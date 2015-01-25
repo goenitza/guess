@@ -24,4 +24,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 		this.userDao = userDao;
 		super.setBaseDao(userDao);
 	}
+	
+	public boolean isUnique(String username) {
+		
+		return userDao.isUnique(username);
+	}
+	public User getByUsername(String username) {
+		return userDao.getByUsername(username);
+	}
 }
