@@ -32,7 +32,7 @@ public class UserController{
 			HttpServletRequest request, HttpServletResponse response){
 		Result result = new Result();
 		if(!userService.isUnique(username)){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.setStatus(HttpServletResponse.SC_CONFLICT);
 			result.setError("用户名已被注册");
 			logger.info(username + " has been registered");
 		}else if(!password.equals(passwordConfirm)){

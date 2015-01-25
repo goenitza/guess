@@ -19,28 +19,34 @@ import com.guess.service.CategoryService;
 
 @Controller
 @RequestMapping("/category")
-public class CategoryController extends BaseController{
-	@Autowired
-	private CategoryService categoryService;
+public class CategoryController{
+	
 	private static Logger logger = LogManager.getLogger(CategoryController.class);
 	
-	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	@Autowired
+	private CategoryService categoryService;
+	
+	@RequestMapping("/add")
 	@ResponseBody
 	public String add(@RequestParam()String name, HttpServletResponse response){
-		if(StringUtils.isBlank(name)){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("param name is null");
-			logger.error("param name is null");
-		}else if(!categoryService.isUnique(name)){
-			response.setStatus(HttpServletResponse.SC_CONFLICT);
-			result.setError("param name " + name + " is conflict");
-			logger.error("param name " + name + " is conflict");
+		Result result = new Result();
+		Category category = categoryService.getByName(name);
+		if(category != null){
+			if(!category.getIsDeleted()){
+				response.setStatus(HttpServletResponse.SC_CONFLICT);
+				result.setError("问题分类已存在");
+				logger.error(name + " is exist");
+			}else {
+				category.setIsDeleted(false);
+				categoryService.update(category);
+				result.set("id", category.getId());
+				logger.info("add category " + name);
+			}
 		}else {
-			Category category = new Category();
-			category.setName(name);
-			String id = categoryService.save(category);
+			Category category2 = new Category();
+			category2.setName(name);
+			String id = categoryService.save(category2);
 			result.set("id", id);
-			response.setStatus(HttpServletResponse.SC_OK);
 			logger.info("add category " + name);
 		}
 		return result.toJson();
@@ -49,13 +55,13 @@ public class CategoryController extends BaseController{
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
 	@ResponseBody
 	public String delete(@RequestParam("ids") String[] ids, HttpServletResponse response){
+		Result result = new Result();
 		if(ids == null || ids.length <= 0){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("id is null");
-			logger.error("id is null");
+			result.setError("ids不能为空");
+			logger.error("ids is null");
 		}else {
 			categoryService.delete(ids);
-			response.setStatus(HttpServletResponse.SC_OK);
 			logger.info("delete category " + ids);
 		}
 		return result.toJson();
@@ -65,20 +71,20 @@ public class CategoryController extends BaseController{
 	@ResponseBody
 	public String update(@RequestParam("id") String id, @RequestParam("name") String name,
 			HttpServletResponse response){
-		if(StringUtils.isBlank(id) || StringUtils.isBlank(name)){
+		Result result = new Result();
+		if(StringUtils.isBlank(id)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("id or name is null");
-			logger.error("id or name is null");
+			result.setError("id不允许为空");
+			logger.error("id is null");
 		}else {
 			Category category = categoryService.get(id);
 			if(category == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				result.setError("can not get category with id " + id);
+				result.setError("找不到具有此id的问题分类： " + id);
 				logger.error("can not get category with id " + id);
 			}else {
 				category.setName(name);
 				categoryService.update(category);
-				response.setStatus(HttpServletResponse.SC_OK);
 				logger.info("update category " + id + " to new name " + name);
 			}
 		}
@@ -88,19 +94,19 @@ public class CategoryController extends BaseController{
 	@RequestMapping(value = "/get", method = RequestMethod.POST)
 	@ResponseBody
 	public String get(@RequestParam("id") String id, HttpServletResponse response){
+		Result result = new Result();
 		if(StringUtils.isBlank(id)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("id is null");
+			result.setError("id不允许为空");
 			logger.error("id is null");
 		}else {
 			Category category = categoryService.get(id);
 			if(category == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				result.setError("can not get category with id " + id);
+				result.setError("找不到具有此id的问题分类： " + id);
 				logger.error("can not get category with id " + id);
 			}else {
 				result.set("category", category);
-				response.setStatus(HttpServletResponse.SC_OK);
 				logger.info("get category " + id);
 			}
 		}
@@ -110,10 +116,10 @@ public class CategoryController extends BaseController{
 	@RequestMapping(value = "/get_all", method = RequestMethod.POST)
 	@ResponseBody
 	public String getAll(HttpServletResponse response){
+		Result result = new Result();
 		List<Category> categories = categoryService.getAllList();
 		result.set("categorys", categories);
 		logger.info("get all categorys");
-		response.setStatus(HttpServletResponse.SC_OK);
 		return result.toJson();
 	}
 }

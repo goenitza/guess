@@ -27,7 +27,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 	
 	public boolean isUnique(String username) {
 		
-		return userDao.isUnique(username);
+		return userDao.getByUsername(username) == null;
 	}
 	public User getByUsername(String username) {
 		return userDao.getByUsername(username);

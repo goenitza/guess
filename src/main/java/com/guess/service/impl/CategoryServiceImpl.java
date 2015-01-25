@@ -70,18 +70,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category, String> imple
 			delete(id);
 		}
 	}
-	
-	public boolean isUnique(String name) {
-		boolean isUnique = true;
-		List<Category> categories = categoryDao.getAllList();
-		if(categories != null){
-			for(Category category : categories){
-				if(category.getName().equals(name)){
-					isUnique = false;
-					break;
-				}
-			}
-		}
-		return isUnique;
+
+	public Category getByName(String name) {
+		return categoryDao.getByName(name);
 	}
 }
