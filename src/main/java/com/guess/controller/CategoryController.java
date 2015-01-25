@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -18,7 +17,7 @@ import com.guess.model.Category;
 import com.guess.service.CategoryService;
 
 @Controller
-@RequestMapping("/category")
+@RequestMapping("/admin/category")
 public class CategoryController{
 	
 	private static Logger logger = LogManager.getLogger(CategoryController.class);
@@ -52,22 +51,20 @@ public class CategoryController{
 		return result.toJson();
 	}
 	
-	@RequestMapping(value = "/delete", method = RequestMethod.POST)
+	@RequestMapping("/delete")
 	@ResponseBody
 	public String delete(@RequestParam("ids") String[] ids, HttpServletResponse response){
 		Result result = new Result();
-		if(ids == null || ids.length <= 0){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("ids²»ÄÜÎª¿Õ");
-			logger.error("ids is null");
-		}else {
-			categoryService.delete(ids);
-			logger.info("delete category " + ids);
+		categoryService.delete(ids);
+		StringBuilder string = new StringBuilder("delete category ");
+		for(String s : ids){
+			string.append(s); 
 		}
+		logger.info(string.toString());
 		return result.toJson();
 	}
 	
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
+	@RequestMapping("/update")
 	@ResponseBody
 	public String update(@RequestParam("id") String id, @RequestParam("name") String name,
 			HttpServletResponse response){
@@ -91,7 +88,7 @@ public class CategoryController{
 		return result.toJson();
 	}
 	
-	@RequestMapping(value = "/get", method = RequestMethod.POST)
+	@RequestMapping("/get")
 	@ResponseBody
 	public String get(@RequestParam("id") String id, HttpServletResponse response){
 		Result result = new Result();
@@ -113,7 +110,7 @@ public class CategoryController{
 		return result.toJson();
 	}
 	
-	@RequestMapping(value = "/get_all", method = RequestMethod.POST)
+	@RequestMapping("/get_all")
 	@ResponseBody
 	public String getAll(HttpServletResponse response){
 		Result result = new Result();
