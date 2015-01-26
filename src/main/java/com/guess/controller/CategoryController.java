@@ -63,7 +63,8 @@ public class CategoryController{
 		logger.info(string.toString());
 		return result.toJson();
 	}
-	
+	/*
+	//Not allowed to update
 	@RequestMapping("/update")
 	@ResponseBody
 	public String update(@RequestParam("id") String id, @RequestParam("name") String name,
@@ -87,7 +88,7 @@ public class CategoryController{
 		}
 		return result.toJson();
 	}
-	
+	*/
 	@RequestMapping("/get")
 	@ResponseBody
 	public String get(@RequestParam("id") String id, HttpServletResponse response){
