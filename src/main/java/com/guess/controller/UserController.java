@@ -1,5 +1,8 @@
 package com.guess.controller;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,26 +42,30 @@ public class UserController{
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("两次输入的密码不一致");
 			logger.info("password and passwordConfirm are not same");
-		}else if(false){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("邮箱格式不正确");
-			logger.info(email + " the format of email is incorrect");
-		}else {
-			if(sickname == null)
-				sickname = username;
-			User user = new User();
-			user.setUsername(username);
-			user.setPassword(DigestUtils.md5Hex(password));
-			user.setEmail(email);
-			user.setSickname(sickname);
-			String id = userService.save(user);
-			UserInSession userInSession = new UserInSession();
-			userInSession.id = id;
-			userInSession.role = Role.USER;
-			request.getSession().setAttribute("user", userInSession);
-			result.set("id", id);
-			logger.info(username + " regisger");
-		}
+		}else{
+			Pattern pattern = Pattern.compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
+			Matcher matcher = pattern.matcher(email);
+			if(!matcher.matches()){
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				result.setError("邮箱格式不正确");
+				logger.info(email + " the format of email is incorrect");
+			}else {
+				if(sickname == null)
+					sickname = username;
+				User user = new User();
+				user.setUsername(username);
+				user.setPassword(DigestUtils.md5Hex(password));
+				user.setEmail(email);
+				user.setSickname(sickname);
+				String id = userService.save(user);
+				UserInSession userInSession = new UserInSession();
+				userInSession.id = id;
+				userInSession.role = Role.USER;
+				request.getSession().setAttribute("user", userInSession);
+				result.set("id", id);
+				logger.info(username + " regisger");
+			}
+		} 
 		return result.toJson();
 	}
 	
