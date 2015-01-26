@@ -31,6 +31,8 @@ public class TypeController {
 			@RequestParam("isContainsQuestion") boolean isContainsQuestion, 
 			@RequestParam("isContainsOption") boolean isContainsOption, 
 			@RequestParam("isContainsAnswer") boolean isContainsAnswer,
+			@RequestParam("isOptionSingle") boolean isOptionSingle,
+			@RequestParam("isOptionAll") boolean isOptionAll,
 			HttpServletResponse response){
 		Result result = new Result();
 		Type type = typeService.getByName(name);
@@ -44,6 +46,8 @@ public class TypeController {
 			type.setIsContainsAnswer(isContainsAnswer);
 			type.setIsContainsOption(isContainsOption);
 			type.setIsContainsQuestion(isContainsQuestion);
+			type.setIsOptionSingle(isOptionSingle);
+			type.setIsOptionAll(isOptionAll);
 			String id = typeService.save(type);
 			result.set("id", id);
 			logger.info("add type " + name);
@@ -63,7 +67,8 @@ public class TypeController {
 		logger.info(string.toString());
 		return result.toJson();
 	}
-	
+	/*
+	//Not allowed to update
 	@RequestMapping("/update")
 	@ResponseBody
 	public String update(@RequestParam("id") String id, 
@@ -95,7 +100,7 @@ public class TypeController {
 		
 		return result.toJson();
 	}
-	
+	*/
 	@RequestMapping("/get")
 	@ResponseBody
 	public String get(@RequestParam("id") String id, HttpServletResponse response){
