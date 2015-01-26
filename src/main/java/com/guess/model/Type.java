@@ -9,6 +9,8 @@ public class Type extends BaseModel{
 	private boolean isContainsQuestion;
 	private boolean isContainsOption;
 	private boolean isContainsAnswer;
+	private boolean isOptionSingle;//true: single select
+	private boolean isOptionAll;//true: order question
 	private boolean isDeleted = false;
 	
 	@Column(nullable = false)
@@ -45,5 +47,19 @@ public class Type extends BaseModel{
 	}
 	public void setIsDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+	@Column(nullable = false)
+	public boolean getIsOptionSingle() {
+		return isOptionSingle;
+	}
+	public void setIsOptionSingle(boolean isOptionSingle) {
+		this.isOptionSingle = isOptionSingle;
+	}
+	@Column(nullable = false)
+	public boolean getIsOptionAll() {
+		return isOptionAll;
+	}
+	public void setIsOptionAll(boolean isOptionAll) {
+		this.isOptionAll = isOptionAll;
 	}
 }

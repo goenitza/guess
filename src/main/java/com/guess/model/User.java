@@ -13,6 +13,9 @@ public class User extends BaseModel{
 	private String avatar = "/default_avatar.jpg";
 	private boolean isVerified = false;
 	private String realname;
+	private int createcount;
+	private int answerCount;
+	private int answerCorrectCount;
 	
 	@Column(nullable = false)
 	public String getUsername() {
@@ -62,5 +65,26 @@ public class User extends BaseModel{
 	}
 	public void setRealname(String realname) {
 		this.realname = realname;
+	}
+	@Column
+	public int getCreatecount() {
+		return createcount;
+	}
+	public void setCreatecount(int createcount) {
+		this.createcount = createcount;
+	}
+	@Column
+	public int getAnswerCount() {
+		return answerCount;
+	}
+	public void setAnswerCount(int answerCount) {
+		this.answerCount = answerCount;
+	}
+	@Column
+	public int getAnswerCorrectCount() {
+		return answerCorrectCount;
+	}
+	public void setAnswerCorrectCount(int answerCorrectCount) {
+		this.answerCorrectCount = answerCorrectCount;
 	}
 }
