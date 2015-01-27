@@ -1,7 +1,6 @@
 package com.guess.model;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,8 +16,9 @@ public class Question extends BaseModel{
 	private boolean isDeleted = false;
 	private boolean isReported = false;
 	private Date date;
-	private Type type;
-	private List<Category> categories;
+	private String userId;
+	private String typeId;
+	private String categoryIds;
 	@Column(nullable = false)
 	public String getQuestion() {
 		return question;
@@ -75,22 +75,32 @@ public class Question extends BaseModel{
 	public void setIsReported(boolean isReported) {
 		this.isReported = isReported;
 	}
+	@Column
 	public Date getDate() {
 		return date;
 	}
 	public void setDate(Date date) {
 		this.date = date;
 	}
-	public Type getType() {
-		return type;
+	@Column
+	public String getUserId() {
+		return userId;
 	}
-	public void setType(Type type) {
-		this.type = type;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
-	public List<Category> getCategories() {
-		return categories;
+	@Column(nullable = false)
+	public String getTypeId() {
+		return typeId;
 	}
-	public void setCategories(List<Category> categories) {
-		this.categories = categories;
+	public void setTypeId(String typeId) {
+		this.typeId = typeId;
+	}
+	@Column
+	public String getCategoryIds() {
+		return categoryIds;
+	}
+	public void setCategoryIds(String categoryIds) {
+		this.categoryIds = categoryIds;
 	}
 }
