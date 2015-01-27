@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class GlobalDefaultExceptionHandler extends BaseController{
+public class GlobalDefaultExceptionHandler{
 	
 	private static Logger logger = LogManager.getLogger(GlobalDefaultExceptionHandler.class);
 	
@@ -19,6 +19,7 @@ public class GlobalDefaultExceptionHandler extends BaseController{
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String missingServletRequestParameterExceptionHandler(Exception e) {
+		Result result = new Result();
 		logger.error(ExceptionUtils.getStackTrace(e));
 		result.setError(e.getMessage());
 		return result.toJson();
@@ -28,6 +29,7 @@ public class GlobalDefaultExceptionHandler extends BaseController{
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String defaultExceptionHandler(Exception e) {
+		Result result = new Result();
 		logger.error(ExceptionUtils.getStackTrace(e));
 		result.setError(e.getMessage());
 		return result.toJson();
