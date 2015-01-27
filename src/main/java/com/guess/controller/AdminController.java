@@ -32,7 +32,7 @@ public class AdminController {
 		Admin admin = adminService.getByUsername(username);
 		if(admin == null || !admin.getPassword().equals(DigestUtils.md5Hex(password))){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("用户名或密码错误");
+			result.setError("鐢ㄦ埛鍚嶆垨瀵嗙爜閿欒");
 			logger.info(username + "/" + password + " is incorrect");
 		}else {
 			UserInSession userInSession = new UserInSession();
