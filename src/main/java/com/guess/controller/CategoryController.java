@@ -33,7 +33,7 @@ public class CategoryController{
 		if(category != null){
 			if(!category.getIsDeleted()){
 				response.setStatus(HttpServletResponse.SC_CONFLICT);
-				result.setError("ÎÊÌâ·ÖÀàÒÑ´æÔÚ");
+				result.setError("é—®é¢˜åˆ†ç±»å·²å­˜åœ¨");
 				logger.error(name + " is exist");
 			}else {
 				category.setIsDeleted(false);
@@ -72,13 +72,13 @@ public class CategoryController{
 		Result result = new Result();
 		if(StringUtils.isBlank(id)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("id²»ÔÊĞíÎª¿Õ");
+			result.setError("idä¸å…è®¸ä¸ºç©º");
 			logger.error("id is null");
 		}else {
 			Category category = categoryService.get(id);
 			if(category == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				result.setError("ÕÒ²»µ½¾ßÓĞ´ËidµÄÎÊÌâ·ÖÀà£º " + id);
+				result.setError("æ‰¾ä¸åˆ°å…·æœ‰æ­¤idçš„é—®é¢˜åˆ†ç±»ï¼š " + id);
 				logger.error("can not get category with id " + id);
 			}else {
 				category.setName(name);
@@ -95,13 +95,13 @@ public class CategoryController{
 		Result result = new Result();
 		if(StringUtils.isBlank(id)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("id²»ÔÊĞíÎª¿Õ");
+			result.setError("idä¸å…è®¸ä¸ºç©º");
 			logger.error("id is null");
 		}else {
 			Category category = categoryService.get(id);
 			if(category == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				result.setError("ÕÒ²»µ½¾ßÓĞ´ËidµÄÎÊÌâ·ÖÀà£º " + id);
+				result.setError("æ‰¾ä¸åˆ°å…·æœ‰æ­¤idçš„é—®é¢˜åˆ†ç±»ï¼š " + id);
 				logger.error("can not get category with id " + id);
 			}else {
 				result.set("category", category);
