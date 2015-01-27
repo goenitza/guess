@@ -38,7 +38,7 @@ public class TypeController {
 		Type type = typeService.getByName(name);
 		if(type != null && !type.getIsDeleted()){
 			response.setStatus(HttpServletResponse.SC_CONFLICT);
-			result.setError("ÌâĞÍÒÑ´æÔÚ");
+			result.setError("é¢˜å‹å·²å­˜åœ¨");
 			logger.info(name + " exists");
 		}else {
 			type = new Type();
@@ -80,13 +80,13 @@ public class TypeController {
 		Result result = new Result();
 		if(StringUtils.isBlank(id)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("id²»ÔÊĞíÎª¿Õ");
+			result.setError("idä¸å…è®¸ä¸ºç©º");
 			logger.error("id is null");
 		}else {
 			Type type = typeService.get(id);
 			if(type == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				result.setError("ÕÒ²»µ½¾ßÓĞ´ËidµÄÌâĞÍ");
+				result.setError("æ‰¾ä¸åˆ°å…·æœ‰æ­¤idçš„é¢˜å‹");
 				logger.info("can not get type with id " + id);
 			}else {
 				type.setName(name);
@@ -107,13 +107,13 @@ public class TypeController {
 		Result result = new Result();
 		if(StringUtils.isBlank(id)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("id²»ÔÊĞíÎª¿Õ");
+			result.setError("idä¸å…è®¸ä¸ºç©º");
 			logger.error("id is null");
 		}else{
 			Type type = typeService.get(id);
 			if(type == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				result.setError("ÕÒ²»µ½¾ßÓĞ´ËidµÄÌâĞÍ£º " + id);
+				result.setError("æ‰¾ä¸åˆ°å…·æœ‰æ­¤idçš„é¢˜å‹ " + id);
 				logger.error("can not get type with id " + id);
 			}else {
 				result.set("type", type);
