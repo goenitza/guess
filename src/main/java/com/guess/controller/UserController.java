@@ -36,18 +36,18 @@ public class UserController{
 		Result result = new Result();
 		if(!userService.isUnique(username)){
 			response.setStatus(HttpServletResponse.SC_CONFLICT);
-			result.setError("ÓÃ»§ÃûÒÑ±»×¢²á");
+			result.setError("ç”¨æˆ·åå·²è¢«æ³¨å†Œ");
 			logger.info(username + " has been registered");
 		}else if(!password.equals(passwordConfirm)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("Á½´ÎÊäÈëµÄÃÜÂë²»Ò»ÖÂ");
+			result.setError("ä¸¤æ¬¡è¾“å…¥çš„å¯†ç ä¸ä¸€è‡´");
 			logger.info("password and passwordConfirm are not same");
 		}else{
 			Pattern pattern = Pattern.compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
 			Matcher matcher = pattern.matcher(email);
 			if(!matcher.matches()){
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				result.setError("ÓÊÏä¸ñÊ½²»ÕıÈ·");
+				result.setError("é‚®ç®±æ ¼å¼ä¸æ­£ç¡®");
 				logger.info(email + " the format of email is incorrect");
 			}else {
 				if(sickname == null)
@@ -77,7 +77,7 @@ public class UserController{
 		User user = userService.getByUsername(username);
 		if(user == null || !user.getPassword().equals(DigestUtils.md5Hex(password))){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("ÓÃ»§Ãû»òÃÜÂë´íÎó");
+			result.setError("ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯");
 			logger.info(username + "/" + password + " username or password is not correct");
 		}else {
 			UserInSession userInSession = new UserInSession();
