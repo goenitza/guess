@@ -17,7 +17,7 @@ import com.guess.model.Type;
 import com.guess.service.TypeService;
 
 @Controller
-@RequestMapping("/admin/type")
+@RequestMapping(value = "/admin/type", produces = "application/json;charset=utf-8")
 public class TypeController {
 
 	private static Logger logger = LogManager.getLogger(TypeController.class);
