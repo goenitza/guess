@@ -8,9 +8,9 @@ import javax.persistence.Entity;
 @Entity
 public class Report extends BaseModel{
 	private String questionId;
-	private String reason;
-	private String userId;
-	private boolean isProcessed;
+	private String reason;//the reason why the question was reported
+	private String userId;//the reporter
+	private boolean isProcessed;//true if the report has been processed by admin
 	private Date date;
 	@Column(nullable = false)
 	public String getQuestionId() {
