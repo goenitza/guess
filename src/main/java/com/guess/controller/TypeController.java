@@ -28,9 +28,7 @@ public class TypeController {
 	@RequestMapping("/add")
 	@ResponseBody
 	public String add(@RequestParam("name") String name, 
-			@RequestParam("isContainsQuestion") boolean isContainsQuestion, 
 			@RequestParam("isContainsOption") boolean isContainsOption, 
-			@RequestParam("isContainsAnswer") boolean isContainsAnswer,
 			@RequestParam("isOptionSingle") boolean isOptionSingle,
 			@RequestParam("isOptionAll") boolean isOptionAll,
 			HttpServletResponse response){
@@ -43,9 +41,7 @@ public class TypeController {
 		}else {
 			type = new Type();
 			type.setName(name);
-			type.setIsContainsAnswer(isContainsAnswer);
 			type.setIsContainsOption(isContainsOption);
-			type.setIsContainsQuestion(isContainsQuestion);
 			type.setIsOptionSingle(isOptionSingle);
 			type.setIsOptionAll(isOptionAll);
 			String id = typeService.save(type);
