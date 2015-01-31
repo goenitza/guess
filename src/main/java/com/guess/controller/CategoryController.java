@@ -17,7 +17,7 @@ import com.guess.model.Category;
 import com.guess.service.CategoryService;
 
 @Controller
-@RequestMapping("/admin/category")
+@RequestMapping(value = "/admin/category", produces = "application/json;charset=utf-8")
 public class CategoryController{
 	
 	private static Logger logger = LogManager.getLogger(CategoryController.class);

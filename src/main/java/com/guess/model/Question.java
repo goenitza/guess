@@ -7,18 +7,19 @@ import javax.persistence.Entity;
 
 @Entity
 public class Question extends BaseModel{
-	private String question;
-	private String option;
-	private String answer;
-	private int answerCount;
-	private int answerCorrectCount;
-	private int shareCount;
+	private String question;//question content
+	private String options;//question options
+	private String answer;//question answer
+	private int answerCount;//the count that the question has been answered
+	private int answerCorrectCount;// the count that the question has been answered correctly
+	private int shareCount;//the count that the question has been shared
 	private boolean isDeleted = false;
-	private boolean isReported = false;
+	private boolean isReported = false;//whether the question had been reported
 	private Date date;
 	private String userId;
 	private String typeId;
-	private String categoryIds;
+	private String categories;//json format, includes multiple items, every item contains category name and id
+	
 	@Column(nullable = false)
 	public String getQuestion() {
 		return question;
@@ -27,11 +28,11 @@ public class Question extends BaseModel{
 		this.question = question;
 	}
 	@Column
-	public String getOption() {
-		return option;
+	public String getOptions() {
+		return options;
 	}
-	public void setOption(String option) {
-		this.option = option;
+	public void setOptions(String options) {
+		this.options = options;
 	}
 	@Column(nullable = false)
 	public String getAnswer() {
@@ -97,10 +98,10 @@ public class Question extends BaseModel{
 		this.typeId = typeId;
 	}
 	@Column
-	public String getCategoryIds() {
-		return categoryIds;
+	public String getCategories() {
+		return categories;
 	}
-	public void setCategoryIds(String categoryIds) {
-		this.categoryIds = categoryIds;
+	public void setCategories(String categories) {
+		this.categories = categories;
 	}
 }

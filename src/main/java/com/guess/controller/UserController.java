@@ -19,7 +19,7 @@ import com.guess.model.User;
 import com.guess.service.UserService;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping(value = "/user", produces = "application/json;charset=utf-8")
 public class UserController{
 	
 	private static Logger logger = LogManager.getLogger(UserController.class);

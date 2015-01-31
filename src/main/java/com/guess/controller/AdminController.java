@@ -16,7 +16,7 @@ import com.guess.model.Admin;
 import com.guess.service.AdminService;
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping(value = "/admin", produces = "application/json;charset=utf-8")
 public class AdminController {
 	
 	private static Logger logger = LogManager.getLogger(AdminController.class);
