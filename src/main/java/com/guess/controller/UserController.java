@@ -60,7 +60,7 @@ public class UserController{
 				String id = userService.save(user);
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
-				userInSession.role = Role.USER;
+				userInSession.role = UserRole.USER;
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
 				logger.info(username + " regisger");
@@ -82,7 +82,7 @@ public class UserController{
 		}else {
 			UserInSession userInSession = new UserInSession();
 			userInSession.id = user.getId();
-			userInSession.role = Role.USER;
+			userInSession.role = UserRole.USER;
 			request.getSession().setAttribute("user", userInSession);
 			result.set("id", user.getId());
 			logger.info(username + " login");
