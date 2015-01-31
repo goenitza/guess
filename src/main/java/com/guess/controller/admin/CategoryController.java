@@ -1,4 +1,4 @@
-package com.guess.controller;
+package com.guess.controller.admin;
 
 import java.util.List;
 
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.guess.controller.Result;
 import com.guess.model.Category;
 import com.guess.service.CategoryService;
 
@@ -34,19 +35,19 @@ public class CategoryController{
 			if(!category.getIsDeleted()){
 				response.setStatus(HttpServletResponse.SC_CONFLICT);
 				result.setError("问题分类已存在");
-				logger.error(name + " is exist");
+				logger.error("the category already exists: " + name);
 			}else {
 				category.setIsDeleted(false);
 				categoryService.update(category);
 				result.set("id", category.getId());
-				logger.info("add category " + name);
+				logger.info("add category: " + name);
 			}
 		}else {
 			Category category2 = new Category();
 			category2.setName(name);
 			String id = categoryService.save(category2);
 			result.set("id", id);
-			logger.info("add category " + name);
+			logger.info("add category: " + name);
 		}
 		return result.toJson();
 	}
@@ -56,9 +57,9 @@ public class CategoryController{
 	public String delete(@RequestParam("ids") String[] ids, HttpServletResponse response){
 		Result result = new Result();
 		categoryService.delete(ids);
-		StringBuilder string = new StringBuilder("delete category ");
+		StringBuilder string = new StringBuilder("delete category: ");
 		for(String s : ids){
-			string.append(s); 
+			string.append(s + " "); 
 		}
 		logger.info(string.toString());
 		return result.toJson();
@@ -102,10 +103,10 @@ public class CategoryController{
 			if(category == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 				result.setError("找不到具有此id的问题分类： " + id);
-				logger.error("can not get category with id " + id);
+				logger.error("can not get category: " + id);
 			}else {
 				result.set("category", category);
-				logger.info("get category " + id);
+				logger.info("get category: " + category.getName());
 			}
 		}
 		return result.toJson();
@@ -117,7 +118,7 @@ public class CategoryController{
 		Result result = new Result();
 		List<Category> categories = categoryService.getAllList();
 		result.set("categorys", categories);
-		logger.info("get all categorys");
+		logger.info("get all categories");
 		return result.toJson();
 	}
 }

@@ -17,7 +17,7 @@ import com.guess.model.Admin;
 import com.guess.service.AdminService;
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping(value = "/admin", produces = "application/json;charset=utf-8")
 public class AdminController {
 	
 	private static Logger logger = LogManager.getLogger(AdminController.class);
@@ -40,6 +40,14 @@ public class AdminController {
 			result.set("id", admin.getId());
 			logger.info("admin login: " + admin.getUsername());
 		}
+		return result.toJson();
+	}
+	
+	@RequestMapping("/logout")
+	@ResponseBody
+	public String logout(HttpServletRequest request){
+		Result result = new Result();
+		request.getSession().removeAttribute("admin");
 		return result.toJson();
 	}
 }

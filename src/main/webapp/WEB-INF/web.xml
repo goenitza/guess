@@ -1,10 +1,6 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
-
 <web-app>
-  <display-name>Archetype Created Web Application</display-name>
-  <context-param>
+	<display-name>Archetype Created Web Application</display-name>
+	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			classpath:spring.xml
@@ -30,4 +26,16 @@
 		<servlet-name>mvc</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+	<filter>
+		<filter-name>adminLoginFilter</filter-name>
+		<filter-class>com.guess.filter.AdminLoginFilter</filter-class>
+		<init-param>
+			<param-name>excluded</param-name>
+			<param-value>/admin/login,/admin/logout</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>adminLoginFilter</filter-name>
+		<url-pattern>/admin/*</url-pattern>
+	</filter-mapping>
 </web-app>
