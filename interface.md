@@ -59,3 +59,28 @@
            }
        ]
     }
+
+## 用户
+### 注册 登录 注销  
+注册  
+/user/register?username=user&password=user&passwordConfirm=user&email=user@163.com&role=USER  
+
+role为用户角色：USER——普通用户、ENTERPRISE——企业用户
+
+    {
+       "id": "402881e54b445ee6014b44637cff0001"
+    }
+登录  
+/user/login?username=user&password=user
+
+    {
+       "id": "402881e54b445ee6014b44637cff0001"
+    }
+注销  
+/user/logout?id=402881e54b445ee6014b44637cff0001
+
+    {
+    }
+
+
+

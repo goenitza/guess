@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +32,19 @@ public class UserController{
 	@ResponseBody
 	public String register(@RequestParam("username") String username, 
 			@RequestParam("password") String password, @RequestParam("passwordConfirm") String passwordConfirm,
-			@RequestParam("email")String email, @RequestParam(value = "sickname", required = false) String sickname,
+			@RequestParam("email")String email, @RequestParam("role") String role, 
+			@RequestParam(value = "sickname", required = false) String sickname,
 			HttpServletRequest request, HttpServletResponse response){
 		Result result = new Result();
-		if(!userService.isUnique(username)){
+		UserRole userRole = UserRole.valueOf(StringUtils.upperCase(role));
+		if(userRole == null){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户角色不存在");
+			logger.info("role does not exists: " + role);
+		}else if(!userService.isUnique(username)){
 			response.setStatus(HttpServletResponse.SC_CONFLICT);
 			result.setError("用户名已被注册");
-			logger.info(username + " has been registered");
+			logger.info("username has been registered: " + username);
 		}else if(!password.equals(passwordConfirm)){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("两次输入的密码不一致");
@@ -48,13 +55,14 @@ public class UserController{
 			if(!matcher.matches()){
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				result.setError("邮箱格式不正确");
-				logger.info(email + " the format of email is incorrect");
+				logger.info("the format of email is incorrect: " + email);
 			}else {
 				if(sickname == null)
 					sickname = username;
 				User user = new User();
 				user.setUsername(username);
 				user.setPassword(DigestUtils.md5Hex(password));
+				user.setRole(userRole);
 				user.setEmail(email);
 				user.setSickname(sickname);
 				String id = userService.save(user);
@@ -63,7 +71,7 @@ public class UserController{
 				userInSession.role = UserRole.USER;
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
-				logger.info(username + " regisger");
+				logger.info("user regisger: " + username);
 			}
 		} 
 		return result.toJson();
@@ -78,14 +86,18 @@ public class UserController{
 		if(user == null || !user.getPassword().equals(DigestUtils.md5Hex(password))){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户名或密码错误");
-			logger.info(username + "/" + password + " username or password is not correct");
+			logger.info("username or password is not correct: " + username);
+		}else if(user.getIsFrozen()){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("此用户已被冻结");
+			logger.info("the user has been frozen: " + username);
 		}else {
 			UserInSession userInSession = new UserInSession();
 			userInSession.id = user.getId();
 			userInSession.role = UserRole.USER;
 			request.getSession().setAttribute("user", userInSession);
 			result.set("id", user.getId());
-			logger.info(username + " login");
+			logger.info("user login: " + username);
 		}
 		return result.toJson();
 	}
@@ -95,7 +107,7 @@ public class UserController{
 	public String logout(@RequestParam("id") String id, HttpServletRequest request){
 		Result result = new Result();
 		request.getSession().removeAttribute(id);
-		logger.info(id + " logout");
+		logger.info("user logout: " + id);
 		return result.toJson();
 	}
 }
