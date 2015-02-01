@@ -29,7 +29,7 @@
     {
     }
 
-获得某一id的问题分类
+获得某一id的问题分类  
 /admin/category/get?id=402881e54b407082014b4078a3d70002  
 
     {
@@ -77,7 +77,7 @@ role为用户角色：USER——普通用户、ENTERPRISE——企业用户
        "id": "402881e54b445ee6014b44637cff0001"
     }
 注销  
-/user/logout?id=402881e54b445ee6014b44637cff0001
+/user/logout
 
     {
     }
