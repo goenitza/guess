@@ -1,5 +1,6 @@
 package com.guess.controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,9 +20,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.guess.model.Category;
+import com.guess.model.Message;
+import com.guess.model.MessageType;
 import com.guess.model.User;
 import com.guess.model.UserRole;
 import com.guess.service.CategoryService;
+import com.guess.service.MessageService;
 import com.guess.service.UserService;
 
 @Controller
@@ -34,6 +38,8 @@ public class UserController{
 	private UserService userService;
 	@Autowired
 	private CategoryService categoryService;
+	@Autowired
+	private MessageService messageService;
 	
 	@RequestMapping("/register")
 	@ResponseBody
@@ -75,6 +81,7 @@ public class UserController{
 				String id = userService.save(user);
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
+				userInSession.username = username;
 				userInSession.role = UserRole.USER;
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
@@ -101,6 +108,7 @@ public class UserController{
 		}else {
 			UserInSession userInSession = new UserInSession();
 			userInSession.id = user.getId();
+			userInSession.username = username;
 			userInSession.role = UserRole.USER;
 			request.getSession().setAttribute("user", userInSession);
 			result.set("id", user.getId());
@@ -147,4 +155,67 @@ public class UserController{
 		}
 		return result.toJson();
 	}
+	
+	@RequestMapping("/get")
+	@ResponseBody
+	public String get(@RequestParam("username") String username, 
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		User user = userService.getByUsername(username);
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		if(user == null || user.getUsername().equals(userInSession.username)){
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			result.setError("找不到此用户");
+			logger.info("the user does not exists: " + username);
+		}else {
+			UserBrief userBrief = new UserBrief();
+			userBrief.username = username;
+			userBrief.avatar = user.getAvatar();
+			result.set("user", userBrief);
+			logger.info("get user: " + username);
+		}
+		return result.toJson();
+	}
+	
+	@RequestMapping("/apply_friend")
+	@ResponseBody
+	public String applyFriend(@RequestParam("username") String username, 
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		User user = userService.getByUsername(username);
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		if(user == null || user.getUsername().equals(userInSession.username)){
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			result.setError("找不到此用户");
+			logger.info("the user does not exists: " + username);
+		}else {
+			
+			Message message = new Message();
+			message.setType(MessageType.FRIEND_APPLICATION);
+			message.setSender(userInSession.username);
+			message.setReceiver(username);
+			message.setDate(new Date());
+			String id = messageService.save(message);
+			logger.info("apply friend: " + userInSession.username + " -> " + username);
+		}
+		return result.toJson();
+	}
+}
+
+class UserBrief{
+	String username;
+	String avatar;
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getAvatar() {
+		return avatar;
+	}
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
 }
