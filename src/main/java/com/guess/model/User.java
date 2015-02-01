@@ -3,8 +3,6 @@ package com.guess.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import com.guess.controller.UserRole;
-
 @Entity
 public class User extends BaseModel{
 	
@@ -107,7 +105,7 @@ public class User extends BaseModel{
 	public void setAnswerCorrectCount(int answerCorrectCount) {
 		this.answerCorrectCount = answerCorrectCount;
 	}
-	@Column
+	@Column(length = 3000)
 	public String getInterestedCategories() {
 		return interestedCategories;
 	}

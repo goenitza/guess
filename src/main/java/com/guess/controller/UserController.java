@@ -1,5 +1,6 @@
 package com.guess.controller;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.guess.model.Category;
 import com.guess.model.User;
+import com.guess.model.UserRole;
+import com.guess.service.CategoryService;
 import com.guess.service.UserService;
 
 @Controller
@@ -27,6 +32,8 @@ public class UserController{
 	
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private CategoryService categoryService;
 	
 	@RequestMapping("/register")
 	@ResponseBody
@@ -104,10 +111,40 @@ public class UserController{
 	
 	@RequestMapping("/logout")
 	@ResponseBody
-	public String logout(@RequestParam("id") String id, HttpServletRequest request){
+	public String logout(HttpServletRequest request){
 		Result result = new Result();
-		request.getSession().removeAttribute(id);
-		logger.info("user logout: " + id);
+		User user = (User) request.getSession().getAttribute("user");
+		String username = null;
+		if(user != null)
+			username = user.getUsername();
+		request.getSession().removeAttribute("user");
+		logger.info("user logout: " + username);
+		return result.toJson();
+	}
+	
+	@RequestMapping("/update_interested_category")
+	@ResponseBody
+	public String updateInterestedCategory(@RequestParam("categories") String categories, 
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		List<Category> cgs = JSON.parseArray(categories, Category.class);
+		List<Category> cgsDB = categoryService.getAllList();
+		boolean hasError = false;
+		for(Category c : cgs){
+			if(!cgsDB.contains(c)){
+				hasError = true;
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				result.setError(c.getName() + "不存在");
+				logger.info("category does not exists: " + c.getName());
+				break;
+			}
+		}
+		if(!hasError){
+			UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+			User user = userService.get(userInSession.id);
+			user.setInterestedCategories(categories);
+			userService.update(user);
+		}
 		return result.toJson();
 	}
 }

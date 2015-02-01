@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.guess.model.Question;
-import com.guess.model.Type;
 import com.guess.service.QuestionCategoryService;
 import com.guess.service.QuestionService;
-import com.guess.service.TypeService;
 import com.guess.service.UserCreateQuestionService;
 
 @Controller
@@ -34,8 +32,6 @@ public class QuestionController {
 	private QuestionCategoryService questionCategoryService;
 	@Autowired
 	private UserCreateQuestionService userCreateQuestionService;
-	@Autowired
-	private TypeService typeService;
 	
 	@RequestMapping("/add")
 	@ResponseBody
@@ -57,20 +53,20 @@ public class QuestionController {
 			return result.toJson();
 		}
 		
-		Type type = typeService.get(typeId);
-		if(type == null){
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			result.setError("找不到具有此id的题型 " + typeId);
-			logger.info("cannot find type with the id " + typeId);
-			return result.toJson();
-		}
+//		Type type = typeService.get(typeId);
+//		if(type == null){
+//			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//			result.setError("找不到具有此id的题型 " + typeId);
+//			logger.info("cannot find type with the id " + typeId);
+//			return result.toJson();
+//		}
 		
-		if(type.getIsContainsOption() && options == null){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("参数option不允许为空 ");
-			logger.info("option is null");
-			return result.toJson();
-		}
+//		if(type.getIsContainsOption() && options == null){
+//			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//			result.setError("参数option不允许为空 ");
+//			logger.info("option is null");
+//			return result.toJson();
+//		}
 		
 		//check if the param categories can be parsed to map
 		try {
