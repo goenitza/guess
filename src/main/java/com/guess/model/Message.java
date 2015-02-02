@@ -5,8 +5,6 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 @Entity
 public class Message extends BaseModel{
 	private MessageType type;
@@ -15,6 +13,7 @@ public class Message extends BaseModel{
 	private String relatedObject;// 
 	private String content;
 	private Date date;
+	private boolean isProcessed;
 	@Column(nullable = false)
 	public MessageType getType() {
 		return type;
@@ -56,5 +55,12 @@ public class Message extends BaseModel{
 	}
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	@Column
+	public boolean getIsProcessed() {
+		return isProcessed;
+	}
+	public void setIsProcessed(boolean isProcessed) {
+		this.isProcessed = isProcessed;
 	}
 }

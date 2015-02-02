@@ -32,4 +32,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 	public User getByUsername(String username) {
 		return userDao.getByUsername(username);
 	}
+	public void addAttention(User user, User enterprise) {
+		
+	}
 }

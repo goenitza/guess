@@ -1,6 +1,7 @@
 package com.guess.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.guess.dao.MessageDao;
 import com.guess.model.Message;
+import com.guess.model.MessageType;
 import com.guess.model.User;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
@@ -68,7 +70,18 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 			
 			userService.update(sender);
 			userService.update(receiver);
+			
+			Message replyMessage = new Message();
+			replyMessage.setType(MessageType.FRIEND_APPLICATION_REPLAY);
+			replyMessage.setReceiver(senderName);
+			replyMessage.setSender(receiverName);
+			replyMessage.setDate(new Date());
+			messageDao.save(replyMessage);
 		}
-		messageDao.delete(message);
+		message.setIsProcessed(true);
+		messageDao.update(message);
+	}
+	public List<Message> getByType(String username, MessageType messageType) {
+		return messageDao.getByType(username, messageType);
 	}
 }

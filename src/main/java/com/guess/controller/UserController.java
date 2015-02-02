@@ -231,7 +231,20 @@ public class UserController{
 			HttpServletRequest request, HttpServletResponse response){
 		Result result = new Result();
 		User enterprise = userService.getByUsername(username);
-
+		if(enterprise == null){
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			result.setError("找不到此用户");
+			logger.info("the user does not exists: " + username);
+		}else if(enterprise.getRole() != UserRole.ENTERPRISE){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户类型不正确");
+			logger.info("the type of user is incorrect: " + username + "/" + enterprise.getRole());
+		}else {
+			UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+			User user = userService.getByUsername(userInSession.username);
+			userService.addAttention(user, enterprise);
+			logger.info("add attention: " + userInSession.username + "->" + username);
+		}
 		return result.toJson();
 	}
 }
