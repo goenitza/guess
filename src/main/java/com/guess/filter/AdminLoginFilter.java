@@ -30,7 +30,7 @@ public class AdminLoginFilter implements Filter {
 		if(!ArrayUtils.contains(excluded, path)){
 			if (httpServletRequest.getSession().getAttribute("admin") == null) {
 				HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-				httpServletResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				httpServletResponse
 						.setContentType("application/json;charset=utf-8");
 				Result result = new Result();

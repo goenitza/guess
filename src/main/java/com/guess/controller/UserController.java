@@ -27,6 +27,8 @@ import com.guess.model.UserRole;
 import com.guess.service.CategoryService;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
+import com.guess.vo.FriendDB;
+import com.guess.vo.UserBrief;
 
 @Controller
 @RequestMapping(value = "/user", produces = "application/json;charset=utf-8")
@@ -169,8 +171,10 @@ public class UserController{
 			logger.info("the user does not exists: " + username);
 		}else {
 			UserBrief userBrief = new UserBrief();
-			userBrief.username = username;
-			userBrief.avatar = user.getAvatar();
+			userBrief.setUsername(username);
+			userBrief.setAvatar(user.getAvatar());
+			userBrief.setRole(user.getRole());
+			userBrief.setIsVerified(user.getIsVerified());
 			result.set("user", userBrief);
 			logger.info("get user: " + username);
 		}
@@ -182,40 +186,52 @@ public class UserController{
 	public String applyFriend(@RequestParam("username") String username, 
 			HttpServletRequest request, HttpServletResponse response){
 		Result result = new Result();
-		User user = userService.getByUsername(username);
+		User friend = userService.getByUsername(username);
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		if(user == null || user.getUsername().equals(userInSession.username)){
+		if(friend == null || friend.getUsername().equals(userInSession.username)){
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
 			logger.info("the user does not exists: " + username);
+		}else if(friend.getRole() != UserRole.USER){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户类型不正确");
+			logger.info("the type of user is incorrect: " + username + "/" + friend.getRole());
 		}else {
-			
-			Message message = new Message();
-			message.setType(MessageType.FRIEND_APPLICATION);
-			message.setSender(userInSession.username);
-			message.setReceiver(username);
-			message.setDate(new Date());
-			String id = messageService.save(message);
-			logger.info("apply friend: " + userInSession.username + " -> " + username);
+			User user = userService.getByUsername(userInSession.username);
+			boolean exists = false;
+			if(StringUtils.isNotBlank(user.getFriends())){
+				List<FriendDB> friendDBs = JSON.parseArray(user.getFriends(), FriendDB.class);
+				for(FriendDB friendDB : friendDBs){
+					if(friendDB.getUsername().equals(username)){
+						exists = true;
+						break;
+					}
+				}
+			}
+			if(exists){
+				response.setStatus(HttpServletResponse.SC_CONFLICT);
+				result.setError("此用户已经是你的好友");
+				logger.info("the user is already your friend: " + username);
+			}else {
+				Message message = new Message();
+				message.setType(MessageType.FRIEND_APPLICATION);
+				message.setSender(userInSession.username);
+				message.setReceiver(username);
+				message.setDate(new Date());
+				String id = messageService.save(message);
+				logger.info("apply friend: " + userInSession.username + " -> " + username);
+			}
 		}
 		return result.toJson();
 	}
-}
+	
+	@RequestMapping("/add_attention")
+	@ResponseBody
+	public String addAttention(@RequestParam("username") String username, 
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		User enterprise = userService.getByUsername(username);
 
-class UserBrief{
-	String username;
-	String avatar;
-	public String getUsername() {
-		return username;
+		return result.toJson();
 	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	public String getAvatar() {
-		return avatar;
-	}
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
-
 }

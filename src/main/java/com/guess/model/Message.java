@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 @Entity
 public class Message extends BaseModel{
 	private MessageType type;
