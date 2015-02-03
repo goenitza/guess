@@ -48,7 +48,7 @@ public class UserController{
 	public String register(@RequestParam("username") String username, 
 			@RequestParam("password") String password, @RequestParam("passwordConfirm") String passwordConfirm,
 			@RequestParam("email")String email, @RequestParam("role") String role, 
-			@RequestParam(value = "sickname", required = false) String sickname,
+			@RequestParam(value = "nickname", required = false) String nickname,
 			HttpServletRequest request, HttpServletResponse response){
 		Result result = new Result();
 		UserRole userRole = UserRole.valueOf(StringUtils.upperCase(role));
@@ -72,21 +72,21 @@ public class UserController{
 				result.setError("邮箱格式不正确");
 				logger.info("the format of email is incorrect: " + email);
 			}else {
-				if(sickname == null)
-					sickname = username;
+				if(nickname == null)
+					nickname = username;
 				User user = new User();
 				user.setUsername(username);
 				user.setPassword(DigestUtils.md5Hex(password));
 				user.setRole(userRole);
 				user.setEmail(email);
-				user.setSickname(sickname);
+				user.setNickname(nickname);
 				String id = userService.save(user);
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
 				userInSession.username = username;
 				userInSession.role = UserRole.USER;
 				request.getSession().setAttribute("user", userInSession);
-				result.set("id", id);
+				//result.set("id", id);
 				logger.info("user regisger: " + username);
 			}
 		} 
@@ -113,7 +113,7 @@ public class UserController{
 			userInSession.username = username;
 			userInSession.role = UserRole.USER;
 			request.getSession().setAttribute("user", userInSession);
-			result.set("id", user.getId());
+			//result.set("id", user.getId());
 			logger.info("user login: " + username);
 		}
 		return result.toJson();
@@ -172,6 +172,7 @@ public class UserController{
 		}else {
 			UserBrief userBrief = new UserBrief();
 			userBrief.setUsername(username);
+			userBrief.setNickName(user.getNickname());
 			userBrief.setAvatar(user.getAvatar());
 			userBrief.setRole(user.getRole());
 			userBrief.setIsVerified(user.getIsVerified());
@@ -188,7 +189,7 @@ public class UserController{
 		Result result = new Result();
 		User friend = userService.getByUsername(username);
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		if(friend == null || friend.getUsername().equals(userInSession.username)){
+		if(friend == null ){
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
 			logger.info("the user does not exists: " + username);
@@ -196,6 +197,10 @@ public class UserController{
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户类型不正确");
 			logger.info("the type of user is incorrect: " + username + "/" + friend.getRole());
+		}else if(friend.getUsername().equals(userInSession.username)){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("不允许添加自己为好友");
+			logger.info("Do not allow to apply the user himself for a friend: " + username);
 		}else {
 			User user = userService.getByUsername(userInSession.username);
 			boolean exists = false;
@@ -225,26 +230,58 @@ public class UserController{
 		return result.toJson();
 	}
 	
-	@RequestMapping("/add_attention")
+	@RequestMapping("/delete_friend")
+	@ResponseBody
+	public String deleteFriend(@RequestParam("username") String username, 
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		userService.deleteFriend(userInSession.username, username);
+		logger.info("delete friend: " + userInSession.username + "->" + username);
+		return result.toJson();
+	}
+	
+	@RequestMapping("/pay_attention")
 	@ResponseBody
 	public String addAttention(@RequestParam("username") String username, 
 			HttpServletRequest request, HttpServletResponse response){
 		Result result = new Result();
-		User enterprise = userService.getByUsername(username);
-		if(enterprise == null){
+		User org = userService.getByUsername(username);
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		if(org == null){
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
 			logger.info("the user does not exists: " + username);
-		}else if(enterprise.getRole() != UserRole.ENTERPRISE){
+		}else if(org.getRole() != UserRole.ORG){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户类型不正确");
-			logger.info("the type of user is incorrect: " + username + "/" + enterprise.getRole());
+			logger.info("the type of user is incorrect: " + username + "/" + org.getRole());
+		}else if(org.getUsername().equals(userInSession.username)){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("不允许关注自己");
+			logger.info("Do not allow to apply the user himself for a friend: " + username);
 		}else {
-			UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
 			User user = userService.getByUsername(userInSession.username);
-			userService.addAttention(user, enterprise);
-			logger.info("add attention: " + userInSession.username + "->" + username);
+			Result r = userService.payAttention(user, org);
+			if(r != null){
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				result = r;
+				logger.info("the user has payed attention to the org: " + userInSession.username + "->" + username);
+			}else {
+				logger.info("pay attention: " + userInSession.username + "->" + username);
+			}
 		}
+		return result.toJson();
+	}
+	
+	@RequestMapping("/delete_attention")
+	@ResponseBody
+	public String deleteAttention(@RequestParam("username") String username,
+			HttpServletRequest request){
+		Result result = new Result();
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		userService.deleteAttention(userInSession.username, username);
+		logger.info("delete attention: " + userInSession.username + "->" + username);
 		return result.toJson();
 	}
 }

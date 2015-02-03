@@ -9,7 +9,7 @@ public class User extends BaseModel{
 	private String username;
 	private String password;
 	private UserRole role;
-	private String sickname;
+	private String nickname;
 	private String email;
 	private String avatar = "/default_avatar.jpg";
 	private boolean isVerified = false;
@@ -19,7 +19,9 @@ public class User extends BaseModel{
 	private int answerCount;
 	private int answerCorrectCount;
 	private String interestedCategories;
-	private String friends;
+	private String friends;// friends are followers for org
+	private String orgs;// orgs those the users pay attention to 
+	private String circles;
 	
 	@Column(nullable = false)
 	public String getUsername() {
@@ -43,11 +45,11 @@ public class User extends BaseModel{
 		this.role = role;
 	}
 	@Column
-	public String getSickname() {
-		return sickname;
+	public String getNickname() {
+		return nickname;
 	}
-	public void setSickname(String sickname) {
-		this.sickname = sickname;
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
 	}
 	@Column(nullable = false)
 	public String getEmail() {
@@ -118,5 +120,19 @@ public class User extends BaseModel{
 	}
 	public void setFriends(String friends) {
 		this.friends = friends;
+	}
+	@Column
+	public String getOrgs() {
+		return orgs;
+	}
+	public void setOrgs(String orgs) {
+		this.orgs = orgs;
+	}
+	@Column
+	public String getCircles() {
+		return circles;
+	}
+	public void setCircles(String circles) {
+		this.circles = circles;
 	}
 }

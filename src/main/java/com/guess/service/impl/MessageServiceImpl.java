@@ -46,9 +46,11 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 			
 			FriendDB senderFriendDB = new FriendDB();
 			senderFriendDB.setUsername(sender.getUsername());
+			senderFriendDB.setNickname(sender.getNickname());
 			senderFriendDB.setAvatar(sender.getAvatar());
 			FriendDB receiverFriendDB = new FriendDB();
 			receiverFriendDB.setUsername(receiver.getUsername());
+			receiverFriendDB.setNickname(receiver.getNickname());
 			receiverFriendDB.setAvatar(receiver.getAvatar());
 			
 			List<FriendDB> senderFriendDBs;

@@ -1,12 +1,9 @@
 package com.guess.vo;
 
-import com.guess.model.UserRole;
-
-public class UserBrief {
+public class OrgDB {
 	String username;
-	String nickName;
+	String nickname;
 	String avatar;
-	UserRole role;
 	boolean isVerified;
 	public String getUsername() {
 		return username;
@@ -20,22 +17,16 @@ public class UserBrief {
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
 	}
-	public UserRole getRole() {
-		return role;
-	}
-	public void setRole(UserRole role) {
-		this.role = role;
-	}
 	public boolean getIsVerified() {
 		return isVerified;
 	}
 	public void setIsVerified(boolean isVerified) {
 		this.isVerified = isVerified;
 	}
-	public String getNickName() {
-		return nickName;
+	public String getNickname() {
+		return nickname;
 	}
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
 	}
 }
