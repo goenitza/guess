@@ -37,7 +37,7 @@ public class AdminController {
 			logger.info(username + "/" + password + " is incorrect");
 		}else {
 			request.getSession().setAttribute("admin", admin);
-			result.set("id", admin.getId());
+			//result.set("id", admin.getId());
 			logger.info("admin login: " + admin.getUsername());
 		}
 		return result.toJson();

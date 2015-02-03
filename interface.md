@@ -4,7 +4,6 @@
 /admin/login?username=admin&password=admin
 
     {
-       "id": "402881e54b407082014b4078a3d70087"
     }
 
 ### 注销
