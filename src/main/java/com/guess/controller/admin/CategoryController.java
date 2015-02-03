@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.guess.controller.Result;
 import com.guess.model.Category;
 import com.guess.service.CategoryService;
+import com.guess.vo.Result;
 
 @Controller
 @RequestMapping(value = "/admin/category", produces = "application/json;charset=utf-8")

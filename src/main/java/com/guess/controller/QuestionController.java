@@ -19,6 +19,8 @@ import com.guess.model.Question;
 import com.guess.service.QuestionCategoryService;
 import com.guess.service.QuestionService;
 import com.guess.service.UserCreateQuestionService;
+import com.guess.vo.Result;
+import com.guess.vo.UserInSession;
 
 @Controller
 @RequestMapping(value = "/question", produces = "application/json;charset=utf-8")

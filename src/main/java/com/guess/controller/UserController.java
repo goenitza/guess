@@ -28,7 +28,9 @@ import com.guess.service.CategoryService;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
 import com.guess.vo.FriendDB;
+import com.guess.vo.Result;
 import com.guess.vo.UserBrief;
+import com.guess.vo.UserInSession;
 
 @Controller
 @RequestMapping(value = "/user", produces = "application/json;charset=utf-8")

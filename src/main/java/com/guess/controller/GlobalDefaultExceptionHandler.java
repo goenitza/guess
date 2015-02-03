@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.guess.vo.Result;
+
 @ControllerAdvice
 public class GlobalDefaultExceptionHandler{
 	

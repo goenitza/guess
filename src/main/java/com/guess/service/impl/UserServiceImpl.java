@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-import com.guess.controller.Result;
 import com.guess.dao.UserDao;
 import com.guess.model.Message;
 import com.guess.model.MessageType;
@@ -20,6 +19,7 @@ import com.guess.service.MessageService;
 import com.guess.service.UserService;
 import com.guess.vo.FriendDB;
 import com.guess.vo.OrgDB;
+import com.guess.vo.Result;
 
 @Component
 public class UserServiceImpl extends BaseServiceImpl<User, String> implements UserService{

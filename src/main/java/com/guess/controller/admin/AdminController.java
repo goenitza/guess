@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.guess.controller.Result;
 import com.guess.model.Admin;
 import com.guess.service.AdminService;
+import com.guess.vo.Result;
 
 @Controller
 @RequestMapping(value = "/admin", produces = "application/json;charset=utf-8")

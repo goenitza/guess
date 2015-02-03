@@ -16,7 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.guess.controller.Result;
+import com.guess.vo.Result;
 
 public class AdminLoginFilter implements Filter {
 	private static Logger logger = LogManager.getLogger(AdminLoginFilter.class);

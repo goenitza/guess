@@ -1,4 +1,4 @@
-package com.guess.controller;
+package com.guess.vo;
 
 import java.util.HashMap;
 import java.util.Map;
