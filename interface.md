@@ -206,7 +206,7 @@ role为用户角色：USER——普通用户、ORG——企业用户
 *id：消息ID*  
 *isAgreed：是否同意加对方为好友*
 ```js
-/user/message/process\_friend\_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true  
+/user/message/process_friend_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true  
 ```
 
 
