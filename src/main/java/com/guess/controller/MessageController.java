@@ -60,14 +60,14 @@ public class MessageController {
 	
 	@RequestMapping("process_friend_application")
 	@ResponseBody
-	public String processFriendApplication(@RequestParam("messageId") String messageId, 
+	public String processFriendApplication(@RequestParam("id") String id, 
 			@RequestParam("isAgreed") boolean isAgreed, HttpServletResponse response){
 		Result result = new Result();
-		Message message = messageService.get(messageId);
+		Message message = messageService.get(id);
 		if(message == null){
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到具有此id的message");
-			logger.info("the message does not exist: " + messageId);
+			logger.info("the message does not exist: " + id);
 		}else {
 			String senderName = message.getSender();
 			String receiverName = message.getReceiver();

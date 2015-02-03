@@ -65,22 +65,169 @@
 注册  
 /user/register?username=user&password=user&passwordConfirm=user&email=user@163.com&role=USER  
 
-role为用户角色：USER——普通用户、ENTERPRISE——企业用户
+role为用户角色：USER——普通用户、ORG——企业用户
 
     {
-       "id": "402881e54b445ee6014b44637cff0001"
     }
 登录  
 /user/login?username=user&password=user
 
     {
-       "id": "402881e54b445ee6014b44637cff0001"
     }
 注销  
 /user/logout
 
     {
     }
+### 用户关系处理（增删好友、增删关注）
+
+添加普通用户为好友流程：  
+1. A查找B  
+2. A申请添加B为好友  
+3. B接收到好友申请消息并处理  
+4. 若B同意A的请求，则A接收到添加成功的消息
+
+关注组织流程：  
+1. A查找G  
+2. A关注G  
+3. G收到A关注的消息
+
+查找用户 
+/user/get?username=user1
+
+    {
+       "user":
+       {
+           "avatar": "/default_avatar.jpg",
+           "isVerified": false,
+           "nickName": "user1",
+           "role": "USER",
+           "username": "user1"
+       }
+    }
+
+
+申请添加好友（针对普通用户）  
+/user/apply_friend?username=user1
+
+    {
+    }
+
+
+删除好友  
+/user/delete_friend?username=user1
+
+    {
+    }
+
+
+
+添加关注（针对组织）  
+/user/pay_attention?username=org
+
+    {
+    }
+
+
+删除关注（针对组织）  
+/user/delete_attention?username=org
+
+    {
+    }
+
+### 消息处理
+
+消息类型：
+<table>
+    <tbody>
+		<tr>
+            <td>值</td>
+            <td>类型</td>
+            <td>说明</td>
+        </tr>
+        <tr>
+            <td>SYSTEM</td>
+            <td>系统消息</td>
+            <td>由管理员发送给用户的消息，比如用户题目违规已被系统删除</td>
+        </tr>
+        <tr>
+            <td>FRIEND_APPLICATION</td>
+            <td>好友申请消息</td>
+            <td>当A请求添加B为好友时，B会收到此类消息</td>
+        </tr>
+ 		<tr>
+            <td>FRIEND_APPLICATION_REPLAY</td>
+            <td>好友申请回复消息</td>
+            <td>B同意A的好友请求后，A会收到此类消息</td>
+        </tr>
+ 		<tr>
+            <td>ORG_ATTENTION</td>
+            <td>组织关注消息</td>
+            <td>A关注组织G后，G会收到此类消息</td>
+        </tr>
+ 		<tr>
+            <td>SHARE_QUESTION</td>
+            <td></td>
+            <td></td>
+        </tr>
+ 		<tr>
+            <td>SHARE_QUESTION_REPLY</td>
+            <td></td>
+            <td></td>
+        </tr>
+ 		<tr>
+            <td>ORG_APPLICATION</td>
+            <td></td>
+            <td></td>
+        </tr>
+ 		<tr>
+            <td>QUESTION_REPORT</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+获取登录用户的所有消息  
+/user/message/get_all
+
+    {
+       "messages":
+       [
+           {
+               "date": "2015-02-03 15:38:43",
+               "id": "8af529b94b4e1d3f014b4e6085950004",
+               "isProcessed": false,
+               "receiver": "user1",
+               "sender": "user",
+               "type": "FRIEND_APPLICATION"
+           }
+       ]
+    }
+
+设置消息为已读  
+/user/message/set_processed?id=8af529b94b4e1d3f014b4e861b0a0005  
+id:消息ID
+
+    {
+    }
+删除消息  
+/user/message/delete?ids=8af529b94b4e1d3f014b4e861b0a0005  
+ids：待删除的消息ID，多个ID之间用逗号分隔
+
+    {
+    }
+
+处理好友申请消息  
+/user/message/process\_friend\_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true  
+
+id：消息ID  
+isAgreed：是否同意加对方为好友
+
+    {
+    }
+
+
 
 
 
