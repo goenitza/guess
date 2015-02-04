@@ -1,5 +1,7 @@
 package com.guess.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,7 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
 import com.guess.model.Category;
@@ -286,4 +291,42 @@ public class UserController{
 		logger.info("delete attention: " + userInSession.username + "->" + username);
 		return result.toJson();
 	}
+	
+	@RequestMapping("/upload_avatar")
+	@ResponseBody
+	public String uploadAvatar(@RequestParam("avatar") MultipartFile avatar, 
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		String contentType = avatar.getContentType();
+		if(!contentType.equals("image/jpg") && !contentType.equals("image/jpeg")
+				 && !contentType.equals("image/png") && !contentType.equals("image/gif")){
+			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+			result.setError("图片格式须为jpg、jpeg、png或者gif");
+			logger.info("format is not supported: " + contentType);
+		}else {
+			long size = avatar.getSize();
+			if(size > 1048576){
+				response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+				result.setError("图片大小不能超过1M");
+				logger.info("the size exceeds 1M: " + size);
+			}else {
+				//to do 
+				
+				UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+				String path = request.getContextPath();
+				System.out.println(path);
+				File file = new File(path + "/" + avatar.getName());
+				try {
+					FileUtils.writeByteArrayToFile(file, avatar.getBytes());
+				} catch (IOException e) {
+					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					result.setError(ExceptionUtils.getFullStackTrace(e));
+					logger.error(ExceptionUtils.getFullStackTrace(e));
+				}
+			}
+		}
+		
+		return result.toJson();
+	}
+	
 }
