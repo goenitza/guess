@@ -11,7 +11,7 @@ public class User extends BaseModel{
 	private UserRole role;
 	private String nickname;
 	private String email;
-	private String avatar = "/default_avatar.jpg";
+	private String avatar;
 	private boolean isVerified = false;
 	private boolean isFrozen = false;
 	private String realname;

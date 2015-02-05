@@ -30,6 +30,7 @@ import com.guess.model.MessageType;
 import com.guess.model.User;
 import com.guess.model.UserRole;
 import com.guess.service.CategoryService;
+import com.guess.service.ImageService;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
 import com.guess.vo.FriendDB;
@@ -49,6 +50,8 @@ public class UserController{
 	private CategoryService categoryService;
 	@Autowired
 	private MessageService messageService;
+	@Autowired
+	private ImageService imageService;
 	
 	@RequestMapping("/register")
 	@ResponseBody
@@ -56,7 +59,7 @@ public class UserController{
 			@RequestParam("password") String password, @RequestParam("passwordConfirm") String passwordConfirm,
 			@RequestParam("email")String email, @RequestParam("role") String role, 
 			@RequestParam(value = "nickname", required = false) String nickname,
-			HttpServletRequest request, HttpServletResponse response){
+			HttpServletRequest request, HttpServletResponse response) throws IOException{
 		Result result = new Result();
 		UserRole userRole = UserRole.valueOf(StringUtils.upperCase(role));
 		if(userRole == null){
@@ -87,6 +90,9 @@ public class UserController{
 				user.setRole(userRole);
 				user.setEmail(email);
 				user.setNickname(nickname);
+				String contextPath = request.getSession().getServletContext().getRealPath("/");
+				String avatar = imageService.setDefaultAvatar(contextPath, username);
+				user.setAvatar(avatar);
 				String id = userService.save(user);
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
@@ -310,19 +316,16 @@ public class UserController{
 				result.setError("图片大小不能超过1M");
 				logger.info("the size exceeds 1M: " + size);
 			}else {
-				//to do 
-				
 				UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-				String path = request.getContextPath();
-				System.out.println(path);
-				File file = new File(path + "/" + avatar.getName());
+				String contextPath = request.getSession().getServletContext().getRealPath("/");
 				try {
-					FileUtils.writeByteArrayToFile(file, avatar.getBytes());
+					imageService.saveAtatar(contextPath, avatar, userInSession.username);
 				} catch (IOException e) {
 					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 					result.setError(ExceptionUtils.getFullStackTrace(e));
 					logger.error(ExceptionUtils.getFullStackTrace(e));
 				}
+				logger.info("upload avatar: " + userInSession.username);
 			}
 		}
 		
