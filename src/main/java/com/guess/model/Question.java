@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 
 @Entity
 public class Question extends BaseModel{
-	private String question;//question content
+	private String content;//question content
 	private String options;//question options
 	private String answer;//question answer
 	private int answerCount;//the count that the question has been answered
@@ -21,11 +21,11 @@ public class Question extends BaseModel{
 	private String categories;//json format, includes multiple items, every item contains category name and id
 	
 	@Column(nullable = false)
-	public String getQuestion() {
-		return question;
+	public String getContent() {
+		return content;
 	}
-	public void setQuestion(String question) {
-		this.question = question;
+	public void setContent(String content) {
+		this.content = content;
 	}
 	@Column
 	public String getOptions() {
