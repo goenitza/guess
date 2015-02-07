@@ -5,9 +5,62 @@
 <title>Insert title here</title>
 </head>
 <body>
-index
+<h3>loginr</h3>
+<form enctype="multipart/form-data" action="user/login" method="POST">
+	<input type="text" name="username"/><br/>
+	<input type="text" name="password"/><br/>
+	<input type="submit" value="submit"/>
+</form>
+<hr/>
+<h3>upload avatar</h3>
 <form enctype="multipart/form-data" action="user/upload_avatar" method="POST">
 	<input type="file" name="avatar"/>
+	<input type="submit" value="submit"/>
+</form>
+<hr/>
+<h3>create question</h3>
+<form enctype="multipart/form-data" action="user/question/add" method="POST">
+	type:<input type="text" name="type"/>SINGLE_CHOICE, MULTIPE_CHOICE, BLANK_FILLING, TRUE_FALSE, SORT<br/>
+	content:<input type="text" name="content"/>今天星期几<br/>
+	contentImage:<input type="file" name="contentImage"/><br/>
+	linkName:<input type="text" name="linkName"/>题目背景<br/>
+	linkUrl:<input type="text" name="linkUrl"/>http://www.baidu.com<br/>
+	options:<input type="text" name="options"/><br/>
+	{
+    "num": "2",
+    "options": [
+        {
+            "index": "1",
+            "content": "星期一",
+            "containsImage": "false",
+            "imageUrl": ""
+        },
+        {
+            "index": "2",
+            "content": "星期儿",
+            "containsImage": "false",
+            "imageUrl": ""
+        }
+    ]
+}<br/>
+	option1Image:<input type="file" name="optionsImages"/><br/>
+	option2Image:<input type="file" name="optionsImages"/><br/>
+	answer:<input type="text" name="answer"/><br/>
+	categories:<input type="text" name="categories"/><br/>
+	[
+    {
+        "id": "402881e54b63a022014b63aa6d34000e",
+        "name": "时事"
+    },
+    {
+        "id": "402881e54b63a022014b63aa7d6d000f",
+        "name": "汽车"
+    }
+]<br/>
+	isPublic:<input type="text" name="isPublic"/><br/>
+	isPublished:<input type="text" name="isPublished"/><br/>
+	friends:<input type="text" name="friends"/><br/>
+	
 	<input type="submit" value="submit"/>
 </form>
 </body>

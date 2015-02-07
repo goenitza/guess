@@ -36,7 +36,7 @@ public class UserLoginFilter implements Filter{
 				Result result = new Result();
 				result.setError("请先登录");
 				response.getWriter().append(result.toJson());
-				logger.info("adminLoginFilter: " + path);
+				logger.info("userLoginFilter: " + path);
 				return;
 			}
 		}

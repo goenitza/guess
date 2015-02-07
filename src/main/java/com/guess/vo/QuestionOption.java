@@ -1,14 +1,32 @@
 package com.guess.vo;
 
-import java.util.List;
-
 public class QuestionOption {
-	int num;
-	List<QuestionOptionItem> questionOptionItems;
-}
-
-class QuestionOptionItem {
 	int index;
 	String content;
+	boolean containsImage;
 	String imageUrl;
+	public int getIndex() {
+		return index;
+	}
+	public void setIndex(int index) {
+		this.index = index;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public boolean getContainsImage() {
+		return containsImage;
+	}
+	public void setContainsImage(boolean containsImage) {
+		this.containsImage = containsImage;
+	}
+	public String getImageUrl() {
+		return imageUrl;
+	}
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 }

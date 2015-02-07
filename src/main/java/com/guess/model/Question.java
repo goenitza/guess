@@ -7,18 +7,20 @@ import javax.persistence.Entity;
 
 @Entity
 public class Question extends BaseModel{
+	private QuestionType type;
 	private String content;//question content
+	private String contentUrl;
+	private String linkName;
+	private String linkUrl;
 	private String options;//question options
 	private String answer;//question answer
-	private int answerCount;//the count that the question has been answered
-	private int answerCorrectCount;// the count that the question has been answered correctly
-	private int shareCount;//the count that the question has been shared
-	private boolean isDeleted = false;
-	private boolean isReported = false;//whether the question had been reported
-	private Date date;
-	private String userId;
-	private String typeId;
+	private String username;
 	private String categories;//json format, includes multiple items, every item contains category name and id
+	private boolean isPublic;//true-all users can find the question
+	private boolean isPublished;
+	private boolean isReported = false;//whether the question had been reported
+	private boolean isDeleted = false;
+	private Date date;
 	
 	@Column(nullable = false)
 	public String getContent() {
@@ -27,7 +29,7 @@ public class Question extends BaseModel{
 	public void setContent(String content) {
 		this.content = content;
 	}
-	@Column
+	@Column(length = 3000)
 	public String getOptions() {
 		return options;
 	}
@@ -40,27 +42,6 @@ public class Question extends BaseModel{
 	}
 	public void setAnswer(String answer) {
 		this.answer = answer;
-	}
-	@Column
-	public int getAnswerCount() {
-		return answerCount;
-	}
-	public void setAnswerCount(int answerCount) {
-		this.answerCount = answerCount;
-	}
-	@Column
-	public int getAnswerCorrectCount() {
-		return answerCorrectCount;
-	}
-	public void setAnswerCorrectCount(int answerCorrectCount) {
-		this.answerCorrectCount = answerCorrectCount;
-	}
-	@Column
-	public int getShareCount() {
-		return shareCount;
-	}
-	public void setShareCount(int shareCount) {
-		this.shareCount = shareCount;
 	}
 	@Column(nullable = false)
 	public boolean getIsDeleted() {
@@ -84,24 +65,59 @@ public class Question extends BaseModel{
 		this.date = date;
 	}
 	@Column
-	public String getUserId() {
-		return userId;
-	}
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-	@Column(nullable = false)
-	public String getTypeId() {
-		return typeId;
-	}
-	public void setTypeId(String typeId) {
-		this.typeId = typeId;
-	}
-	@Column
 	public String getCategories() {
 		return categories;
 	}
 	public void setCategories(String categories) {
 		this.categories = categories;
+	}
+	@Column(nullable = false)
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	@Column(nullable = false)
+	public QuestionType getType() {
+		return type;
+	}
+	public void setType(QuestionType type) {
+		this.type = type;
+	}
+	@Column(nullable = false)
+	public boolean getIsPublic() {
+		return isPublic;
+	}
+	public void setIsPublic(boolean isPublic) {
+		this.isPublic = isPublic;
+	}
+	@Column(nullable = false)
+	public boolean getIsPublished() {
+		return isPublished;
+	}
+	public void setIsPublished(boolean isPublished) {
+		this.isPublished = isPublished;
+	}
+	@Column
+	public String getLinkName() {
+		return linkName;
+	}
+	public void setLinkName(String linkName) {
+		this.linkName = linkName;
+	}
+	@Column
+	public String getLinkUrl() {
+		return linkUrl;
+	}
+	public void setLinkUrl(String linkUrl) {
+		this.linkUrl = linkUrl;
+	}
+	@Column
+	public String getContentUrl() {
+		return contentUrl;
+	}
+	public void setContentUrl(String contentUrl) {
+		this.contentUrl = contentUrl;
 	}
 }

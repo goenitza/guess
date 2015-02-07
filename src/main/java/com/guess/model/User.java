@@ -15,9 +15,6 @@ public class User extends BaseModel{
 	private boolean isVerified = false;
 	private boolean isFrozen = false;
 	private String realname;
-	private int createcount;
-	private int answerCount;
-	private int answerCorrectCount;
 	private String interestedCategories;
 	private String friends;// friends are followers for org
 	private String orgs;// orgs those the users pay attention to 
@@ -85,27 +82,6 @@ public class User extends BaseModel{
 	}
 	public void setRealname(String realname) {
 		this.realname = realname;
-	}
-	@Column
-	public int getCreatecount() {
-		return createcount;
-	}
-	public void setCreatecount(int createcount) {
-		this.createcount = createcount;
-	}
-	@Column
-	public int getAnswerCount() {
-		return answerCount;
-	}
-	public void setAnswerCount(int answerCount) {
-		this.answerCount = answerCount;
-	}
-	@Column
-	public int getAnswerCorrectCount() {
-		return answerCorrectCount;
-	}
-	public void setAnswerCorrectCount(int answerCorrectCount) {
-		this.answerCorrectCount = answerCorrectCount;
 	}
 	@Column(length = 3000)
 	public String getInterestedCategories() {

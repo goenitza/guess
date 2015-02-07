@@ -1,11 +1,12 @@
 package com.guess.controller;
 
+import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +18,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
 import com.guess.model.Question;
+import com.guess.model.QuestionType;
+import com.guess.service.ImageService;
 import com.guess.service.QuestionCategoryService;
 import com.guess.service.QuestionService;
 import com.guess.service.UserCreateQuestionService;
+import com.guess.vo.QuestionOption;
+import com.guess.vo.QuestionOptions;
 import com.guess.vo.Result;
 import com.guess.vo.UserInSession;
 
 @Controller
-@RequestMapping(value = "/question", produces = "application/json;charset=utf-8")
+@RequestMapping(value = "/user/question", produces = "application/json;charset=utf-8")
 public class QuestionController {
 	
 	private static Logger logger = LogManager.getLogger(QuestionController.class);
@@ -35,75 +40,84 @@ public class QuestionController {
 	private QuestionCategoryService questionCategoryService;
 	@Autowired
 	private UserCreateQuestionService userCreateQuestionService;
+	@Autowired
+	private ImageService imageService;
 	
-	
-	public String add_(String content, MultipartFile contentImage, String option, MultipartFile[] optionImages){
-		Result result = new Result();
-		
-		return result.toJson();
-	}
-	
+	//options-json
+	//categories-json
+	//friends-json:["friend1Id","friend2Id",...]
 	@RequestMapping("/add")
 	@ResponseBody
-	public String add(@RequestParam("question") String question, 
+	public String add_(@RequestParam("type") QuestionType type,
+			@RequestParam("content") String content, 
+			@RequestParam(value = "contentImage", required = false) MultipartFile contentImage, 
+			@RequestParam(value = "linkName", required = false) String linkName,
+			@RequestParam(value = "linkUrl", required = false) String linkUrl, 
 			@RequestParam(value = "options", required = false) String options, 
-			@RequestParam("answer") String answer, 
-			@RequestParam("typeId") String typeId, 
-			@RequestParam("categories") String categories, 
-			HttpServletRequest request, 
-			HttpServletResponse response){
+			@RequestParam(value = "optionsImages", required = false) MultipartFile[] optionsImages, 
+			@RequestParam(value = "answer", required = false) String answer, 
+			@RequestParam(value = "categories", required = false) String categories, 
+			@RequestParam("isPublic") boolean isPublic, 
+			@RequestParam("isPublished") boolean isPublished, 
+			@RequestParam(value = "friends", required = false) String friends, 
+			HttpServletRequest request
+			) throws IOException{
 		Result result = new Result();
 		
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		String userId = null;
-		if(userInSession == null || (userId = userInSession.id) == null){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("请先登录 ");
-			logger.info("the user has not logged in");
-			return result.toJson();
+		Question question = new Question();
+		question.setType(type);
+		question.setContent(content);
+		String contextPath = request.getSession().getServletContext().getRealPath("/");
+		if(contentImage != null){
+			String fileName = userInSession.username + "_content"; 
+			String contentUrl = imageService.saveQuestionContentImage(contextPath, contentImage, fileName);
+			question.setContentUrl(contentUrl);
 		}
-		
-//		Type type = typeService.get(typeId);
-//		if(type == null){
-//			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-//			result.setError("找不到具有此id的题型 " + typeId);
-//			logger.info("cannot find type with the id " + typeId);
-//			return result.toJson();
-//		}
-		
-//		if(type.getIsContainsOption() && options == null){
-//			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-//			result.setError("参数option不允许为空 ");
-//			logger.info("option is null");
-//			return result.toJson();
-//		}
-		
-		//check if the param categories can be parsed to map
-		try {
-			Map<String, String> map = (Map<String, String>) JSON.parse(categories);
-		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("参数categories不能被正确解析 ");
-			logger.info("param categores cannot be parsed to map");
-			return result.toJson();
+		if(StringUtils.isNotBlank(linkName)){
+			question.setLinkName(linkName);
 		}
-		
-		Date date = new Date();
-		Question ques = new Question();
-//		ques.setQuestion(question);
-		if(options != null){
-			ques.setOptions(options);
+		if(StringUtils.isNotBlank(linkUrl)){
+			question.setLinkUrl(linkUrl);
 		}
-		ques.setAnswer(answer);
-		ques.setDate(date);
-		ques.setUserId(userId);
-		ques.setTypeId(typeId);
-		ques.setCategories(categories);
+		if(StringUtils.isNotBlank(options)){
+			QuestionOptions questionOptions = JSON.parseObject(options, QuestionOptions.class);
+			List<QuestionOption> optionList = questionOptions.getOptions();
+			for(int i = 0; i < optionList.size(); i++){
+				QuestionOption option = optionList.get(i);
+				if(option.getContainsImage()){
+					String fileName = userInSession.username + "_option_" + (i + 1);
+					String imageUrl = imageService.saveQuestionOptionImage(contextPath, optionsImages[i], fileName);
+					option.setImageUrl(imageUrl);
+				}
+			}
+			question.setOptions(JSON.toJSONString(questionOptions));
+		}
+		if(StringUtils.isNotBlank(answer)){
+			question.setAnswer(answer);
+		}
+		if(StringUtils.isNotBlank(categories)){
+			question.setCategories(categories);
+		}
+		question.setIsPublic(isPublic);
+		question.setIsPublished(isPublished);
+		question.setUsername(userInSession.username);
+		question.setDate(new Date());
 		
-		String id = questionService.save(ques);
+		String id = questionService.save(question, friends);
 		result.set("id", id);
-		logger.info("add question " + id);
-		
+		logger.info("add question: " + id);
+		return result.toJson();
+	}
+	
+	//friends-json
+	@RequestMapping("/share")
+	@ResponseBody
+	public String share(@RequestParam("id") String id, @RequestParam("friends") String friends, 
+			HttpServletRequest request){
+		Result result = new Result();
+		questionService.share(id, friends);
+		logger.info("share question: " + id);
 		return result.toJson();
 	}
 }

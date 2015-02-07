@@ -8,4 +8,5 @@ public interface Constant {
 	String ORG_AUTHENTIFICATION_PATH = "resources" + File.separator + "org_authentification" + File.separator;
 	String DEFAULT_AVATAR = AVATAR_STORAGE_PATH + File.separator + "default" 
 			+File.separator +"default.gif";
+	String QUESTION_IMAGE_PATH = "resources" + File.separator + "question" + File.separator;
 }

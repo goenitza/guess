@@ -7,17 +7,16 @@ import javax.persistence.Entity;
 
 @Entity
 public class UserCreateQuestion extends BaseModel{
-	private String userId;
+	private String username;
 	private String questionId;
-	private boolean isDeleted = false;
 	private Date date;
 	
 	@Column(nullable = false)
-	public String getUserId() {
-		return userId;
+	public String getUsername() {
+		return username;
 	}
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 	@Column(nullable = false)
 	public String getQuestionId() {
@@ -25,13 +24,6 @@ public class UserCreateQuestion extends BaseModel{
 	}
 	public void setQuestionId(String questionId) {
 		this.questionId = questionId;
-	}
-	@Column(nullable = false)
-	public boolean getIsDeleted() {
-		return isDeleted;
-	}
-	public void setIsDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
 	}
 	@Column(nullable = false)
 	public Date getDate() {

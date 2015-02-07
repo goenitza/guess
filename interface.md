@@ -150,12 +150,12 @@ role为用户角色：USER——普通用户、ORG——企业用户
             <td>A关注组织G后，G会收到此类消息</td>
         </tr>
  		<tr>
-            <td>SHARE_QUESTION</td>
+            <td>QUESTION_SHARE</td>
             <td></td>
             <td></td>
         </tr>
  		<tr>
-            <td>SHARE_QUESTION_REPLY</td>
+            <td>QUESTION_SHARE_REPLY</td>
             <td></td>
             <td></td>
         </tr>
