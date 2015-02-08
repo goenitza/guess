@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.guess.dao.MessageDao;
+import com.guess.enums.MessageType;
 import com.guess.model.Message;
-import com.guess.model.MessageType;
 
 @Component
 public class MessageDaoImpl extends BaseDaoImpl<Message, String> implements MessageDao{

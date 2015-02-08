@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import com.guess.enums.QuestionType;
+
 @Entity
 public class Question extends BaseModel{
 	private QuestionType type;

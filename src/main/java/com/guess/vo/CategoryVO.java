@@ -1,6 +1,6 @@
 package com.guess.vo;
 
-public class Category {
+public class CategoryVO {
 	private String id;
 	private String name;
 	public String getId() {

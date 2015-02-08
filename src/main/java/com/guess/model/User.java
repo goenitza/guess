@@ -2,9 +2,15 @@ package com.guess.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import com.guess.enums.UserRole;
 
 @Entity
-public class User extends BaseModel{
+public class User{
 	
 	private String username;
 	private String password;
@@ -20,7 +26,9 @@ public class User extends BaseModel{
 	private String orgs;// orgs those the users pay attention to 
 	private String circles;
 	
-	@Column(nullable = false)
+	@Id
+	@GenericGenerator(name = "assigned", strategy = "assigned")
+	@GeneratedValue(generator = "assigned")
 	public String getUsername() {
 		return username;
 	}
@@ -110,5 +118,26 @@ public class User extends BaseModel{
 	}
 	public void setCircles(String circles) {
 		this.circles = circles;
+	}
+
+	@Override
+	public boolean equals(Object object){
+		if(object == null){
+			return false;
+		}
+		if(object instanceof User){
+			User user = (User) object;
+			if(this.getUsername() == null || user.getUsername() == null){
+				return false;
+			}
+			return (this.getUsername().equals(user.getUsername()));
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return username == null ? System.identityHashCode(this) 
+				: (this.getClass().getName() + this.getUsername()).hashCode();
 	}
 }

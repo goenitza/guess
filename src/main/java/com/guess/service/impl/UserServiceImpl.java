@@ -12,11 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.guess.dao.UserDao;
+import com.guess.enums.MessageType;
 import com.guess.model.Message;
-import com.guess.model.MessageType;
 import com.guess.model.User;
+import com.guess.model.UserStatistics;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
+import com.guess.service.UserStatisticsService;
 import com.guess.vo.FriendDB;
 import com.guess.vo.OrgDB;
 import com.guess.vo.Result;
@@ -27,6 +29,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 	private UserDao userDao;
 	@Autowired
 	private MessageService messageService;
+	@Autowired
+	private UserStatisticsService userStatisticsService;
 	
 	public UserDao getUserDao() {
 		return userDao;
@@ -39,10 +43,17 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 	
 	public boolean isUnique(String username) {
 		
-		return userDao.getByUsername(username) == null;
+		return userDao.get(username) == null;
 	}
-	public User getByUsername(String username) {
-		return userDao.getByUsername(username);
+	
+	@Override
+	@Transactional
+	public String save(User user){
+		String id = super.save(user);
+		UserStatistics userStatistics = new UserStatistics();
+		userStatistics.setId(user.getUsername());
+		userStatisticsService.save(userStatistics);
+		return id;
 	}
 	
 	@Transactional
@@ -100,7 +111,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 	@Transactional
 	public void deleteFriend(String username, String friendUsername) {
 		//update 'friends' of user
-		User user = userDao.getByUsername(username);
+		User user = userDao.get(username);
 		if(StringUtils.isNotBlank(user.getFriends())){
 			List<FriendDB> userFriendDBs = JSON.parseArray(user.getFriends(), FriendDB.class);
 			Iterator<FriendDB> iterator = userFriendDBs.iterator();
@@ -121,7 +132,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 		}
 		
 		//update 'friends' of friend
-		User friend = userDao.getByUsername(friendUsername);
+		User friend = userDao.get(friendUsername);
 		if(StringUtils.isNotBlank(friend.getFriends())){
 			List<FriendDB> friendFriendDBs = JSON.parseArray(friend.getFriends(), FriendDB.class);
 			Iterator<FriendDB> iterator = friendFriendDBs.iterator();
@@ -144,7 +155,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 	@Transactional
 	public void deleteAttention(String username, String orgUsername) {
 		//update 'orgs' of user
-		User user = userDao.getByUsername(username);
+		User user = userDao.get(username);
 		if(StringUtils.isNotBlank(user.getOrgs())){
 			List<OrgDB> userOrgDBs = JSON.parseArray(user.getOrgs(), OrgDB.class);
 			boolean exists = false;
@@ -164,7 +175,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, String> implements Us
 			}
 		}
 		//update 'friends' of org
-		User org = userDao.getByUsername(orgUsername);
+		User org = userDao.get(orgUsername);
 		if(StringUtils.isNotBlank(org.getFriends())){
 			List<FriendDB> friendDBs = JSON.parseArray(org.getFriends(), FriendDB.class);
 			boolean exists = false;

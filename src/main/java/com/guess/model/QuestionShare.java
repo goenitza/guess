@@ -4,15 +4,8 @@ import javax.persistence.Entity;
 
 //who does the question been shared to
 @Entity
-public class UserShareQuestion extends BaseModel{
-	private String questionId;
+public class QuestionShare extends BaseModelAssignedId{
 	private String friends;//json
-	public String getQuestionId() {
-		return questionId;
-	}
-	public void setQuestionId(String questionId) {
-		this.questionId = questionId;
-	}
 	public String getFriends() {
 		return friends;
 	}

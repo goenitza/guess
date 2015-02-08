@@ -22,8 +22,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 
+
+import com.guess.enums.MessageType;
 import com.guess.model.Message;
-import com.guess.model.MessageType;
 import com.guess.service.MessageService;
 import com.guess.vo.Result;
 import com.guess.vo.UserInSession;

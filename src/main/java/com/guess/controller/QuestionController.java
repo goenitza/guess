@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -18,11 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
 import com.guess.model.Question;
-import com.guess.model.QuestionType;
+import com.guess.enums.QuestionType;
 import com.guess.service.ImageService;
 import com.guess.service.QuestionCategoryService;
 import com.guess.service.QuestionService;
 import com.guess.service.UserCreateQuestionService;
+import com.guess.util.ImageUtil;
 import com.guess.vo.QuestionOption;
 import com.guess.vo.QuestionOptions;
 import com.guess.vo.Result;
@@ -43,9 +45,40 @@ public class QuestionController {
 	@Autowired
 	private ImageService imageService;
 	
-	//options-json
-	//categories-json
-	//friends-json:["friend1Id","friend2Id",...]
+	/*options:
+	{
+	    "num": "2",
+	    "options": [
+	        {
+	            "index": "1",
+	            "content": "星期一",
+	            "containsImage": "true"
+	        },
+	        {
+	            "index": "2",
+	            "content": "星期二",
+	            "containsImage": "true"
+	        }
+	    ]
+	}
+	categories:
+	[
+	    {
+	        "id": "402881e54b63a022014b63aa6d34000e",
+	        "name": "时事"
+	    },
+	    {
+	        "id": "402881e54b63a022014b63aa7d6d000f",
+	        "name": "汽车"
+	    }
+	]
+	friends:
+	[
+		"friend1Id",
+		"friend2Id"
+	]
+	 * 
+	 */
 	@RequestMapping("/add")
 	@ResponseBody
 	public String add_(@RequestParam("type") QuestionType type,
@@ -60,9 +93,12 @@ public class QuestionController {
 			@RequestParam("isPublic") boolean isPublic, 
 			@RequestParam("isPublished") boolean isPublished, 
 			@RequestParam(value = "friends", required = false) String friends, 
-			HttpServletRequest request
+			HttpServletRequest request, HttpServletResponse response
 			) throws IOException{
 		Result result = new Result();
+		//to do
+		
+		
 		
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
 		Question question = new Question();
@@ -70,6 +106,12 @@ public class QuestionController {
 		question.setContent(content);
 		String contextPath = request.getSession().getServletContext().getRealPath("/");
 		if(contentImage != null){
+			if(!ImageUtil.check(contentImage)){
+				response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+				result.setError("图片格式须为jpg、jpeg、png或者gif并且大小不能超过1M");
+				logger.info("image format is not supported or size > 1M");
+				return result.toJson();
+			}
 			String fileName = userInSession.username + "_content"; 
 			String contentUrl = imageService.saveQuestionContentImage(contextPath, contentImage, fileName);
 			question.setContentUrl(contentUrl);
@@ -86,6 +128,12 @@ public class QuestionController {
 			for(int i = 0; i < optionList.size(); i++){
 				QuestionOption option = optionList.get(i);
 				if(option.getContainsImage()){
+					if(!ImageUtil.check(optionsImages[i])){
+						response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+						result.setError("图片格式须为jpg、jpeg、png或者gif并且大小不能超过1M");
+						logger.info("image format is not supported or size > 1M");
+						return result.toJson();
+					}
 					String fileName = userInSession.username + "_option_" + (i + 1);
 					String imageUrl = imageService.saveQuestionOptionImage(contextPath, optionsImages[i], fileName);
 					option.setImageUrl(imageUrl);
@@ -116,7 +164,8 @@ public class QuestionController {
 	public String share(@RequestParam("id") String id, @RequestParam("friends") String friends, 
 			HttpServletRequest request){
 		Result result = new Result();
-		questionService.share(id, friends);
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		questionService.share(userInSession.username, id, friends);
 		logger.info("share question: " + id);
 		return result.toJson();
 	}

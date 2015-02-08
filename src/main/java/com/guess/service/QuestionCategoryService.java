@@ -1,7 +1,7 @@
 package com.guess.service;
 
-import com.guess.model.QuestionCategory;
+import com.guess.model.CategoryQuestion;
 
-public interface QuestionCategoryService extends BaseService<QuestionCategory, String>{
+public interface QuestionCategoryService extends BaseService<CategoryQuestion, String>{
 
 }

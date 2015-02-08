@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.guess.dao.QuestionCategoryDao;
-import com.guess.model.QuestionCategory;
+import com.guess.model.CategoryQuestion;
 import com.guess.service.QuestionCategoryService;
 
 @Component
-public class QuestionCategoryServiceImpl extends BaseServiceImpl<QuestionCategory, String> implements QuestionCategoryService{
+public class QuestionCategoryServiceImpl extends BaseServiceImpl<CategoryQuestion, String> implements QuestionCategoryService{
 	private QuestionCategoryDao questionCategoryDao;
 
 	public QuestionCategoryDao getQuestionCategoryDao() {

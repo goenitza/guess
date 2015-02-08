@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.guess.dao.MessageDao;
+import com.guess.enums.MessageType;
 import com.guess.model.Message;
-import com.guess.model.MessageType;
 import com.guess.model.User;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
@@ -41,8 +41,8 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 			String senderName = message.getSender();
 			String receiverName = message.getReceiver();
 			
-			User sender = userService.getByUsername(senderName);
-			User receiver = userService.getByUsername(receiverName);
+			User sender = userService.get(senderName);
+			User receiver = userService.get(receiverName);
 			
 			FriendDB senderFriendDB = new FriendDB();
 			senderFriendDB.setUsername(sender.getUsername());

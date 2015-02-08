@@ -22,15 +22,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
+import com.guess.enums.MessageType;
+import com.guess.enums.UserRole;
 import com.guess.model.Category;
 import com.guess.model.Message;
-import com.guess.model.MessageType;
 import com.guess.model.User;
-import com.guess.model.UserRole;
 import com.guess.service.CategoryService;
 import com.guess.service.ImageService;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
+import com.guess.util.ImageUtil;
 import com.guess.vo.FriendDB;
 import com.guess.vo.Result;
 import com.guess.vo.UserBrief;
@@ -38,10 +39,10 @@ import com.guess.vo.UserInSession;
 
 @Controller
 @RequestMapping(value = "/user", produces = "application/json;charset=utf-8")
-public class UserController{
-	
+public class UserController {
+
 	private static Logger logger = LogManager.getLogger(UserController.class);
-	
+
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -50,37 +51,42 @@ public class UserController{
 	private MessageService messageService;
 	@Autowired
 	private ImageService imageService;
-	
+
 	@RequestMapping("/register")
 	@ResponseBody
-	public String register(@RequestParam("username") String username, 
-			@RequestParam("password") String password, @RequestParam("passwordConfirm") String passwordConfirm,
-			@RequestParam("email")String email, @RequestParam("role") String role, 
+	public String register(
+			@RequestParam("username") String username,
+			@RequestParam("password") String password,
+			@RequestParam("passwordConfirm") String passwordConfirm,
+			@RequestParam("email") String email,
+			@RequestParam("role") String role,
 			@RequestParam(value = "nickname", required = false) String nickname,
-			HttpServletRequest request, HttpServletResponse response) throws IOException{
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
 		Result result = new Result();
 		UserRole userRole = UserRole.valueOf(StringUtils.upperCase(role));
-		if(userRole == null){
+		if (userRole == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户角色不存在");
 			logger.info("role does not exists: " + role);
-		}else if(!userService.isUnique(username)){
+		} else if (!userService.isUnique(username)) {
 			response.setStatus(HttpServletResponse.SC_CONFLICT);
 			result.setError("用户名已被注册");
 			logger.info("username has been registered: " + username);
-		}else if(!password.equals(passwordConfirm)){
+		} else if (!password.equals(passwordConfirm)) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("两次输入的密码不一致");
 			logger.info("password and passwordConfirm are not same");
-		}else{
-			Pattern pattern = Pattern.compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
+		} else {
+			Pattern pattern = Pattern
+					.compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
 			Matcher matcher = pattern.matcher(email);
-			if(!matcher.matches()){
+			if (!matcher.matches()) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				result.setError("邮箱格式不正确");
 				logger.info("the format of email is incorrect: " + email);
-			}else {
-				if(nickname == null)
+			} else {
+				if (nickname == null)
 					nickname = username;
 				User user = new User();
 				user.setUsername(username);
@@ -88,71 +94,74 @@ public class UserController{
 				user.setRole(userRole);
 				user.setEmail(email);
 				user.setNickname(nickname);
-				String contextPath = request.getSession().getServletContext().getRealPath("/");
-				String avatar = imageService.setDefaultAvatar(contextPath, username);
+				String contextPath = request.getSession().getServletContext()
+						.getRealPath("/");
+				String avatar = imageService.setDefaultAvatar(contextPath,
+						username);
 				user.setAvatar(avatar);
 				String id = userService.save(user);
 				UserInSession userInSession = new UserInSession();
-				userInSession.id = id;
 				userInSession.username = username;
 				userInSession.role = UserRole.USER;
 				request.getSession().setAttribute("user", userInSession);
-				//result.set("id", id);
+				// result.set("id", id);
 				logger.info("user regisger: " + username);
 			}
-		} 
+		}
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/login")
 	@ResponseBody
-	public String login(@RequestParam("username") String username, @RequestParam("password") String password,
-			HttpServletRequest request, HttpServletResponse response){
+	public String login(@RequestParam("username") String username,
+			@RequestParam("password") String password,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User user = userService.getByUsername(username);
-		if(user == null || !user.getPassword().equals(DigestUtils.md5Hex(password))){
+		User user = userService.get(username);
+		if (user == null
+				|| !user.getPassword().equals(DigestUtils.md5Hex(password))) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户名或密码错误");
 			logger.info("username or password is not correct: " + username);
-		}else if(user.getIsFrozen()){
+		} else if (user.getIsFrozen()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("此用户已被冻结");
 			logger.info("the user has been frozen: " + username);
-		}else {
+		} else {
 			UserInSession userInSession = new UserInSession();
-			userInSession.id = user.getId();
 			userInSession.username = username;
 			userInSession.role = UserRole.USER;
 			request.getSession().setAttribute("user", userInSession);
-			//result.set("id", user.getId());
+			// result.set("id", user.getId());
 			logger.info("user login: " + username);
 		}
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/logout")
 	@ResponseBody
-	public String logout(HttpServletRequest request){
+	public String logout(HttpServletRequest request) {
 		Result result = new Result();
 		User user = (User) request.getSession().getAttribute("user");
 		String username = null;
-		if(user != null)
+		if (user != null)
 			username = user.getUsername();
 		request.getSession().removeAttribute("user");
 		logger.info("user logout: " + username);
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/update_interested_category")
 	@ResponseBody
-	public String updateInterestedCategory(@RequestParam("categories") String categories, 
-			HttpServletRequest request, HttpServletResponse response){
+	public String updateInterestedCategory(
+			@RequestParam("categories") String categories,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
 		List<Category> cgs = JSON.parseArray(categories, Category.class);
 		List<Category> cgsDB = categoryService.getAllList();
 		boolean hasError = false;
-		for(Category c : cgs){
-			if(!cgsDB.contains(c)){
+		for (Category c : cgs) {
+			if (!cgsDB.contains(c)) {
 				hasError = true;
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				result.setError(c.getName() + "不存在");
@@ -160,27 +169,29 @@ public class UserController{
 				break;
 			}
 		}
-		if(!hasError){
-			UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-			User user = userService.get(userInSession.id);
+		if (!hasError) {
+			UserInSession userInSession = (UserInSession) request.getSession()
+					.getAttribute("user");
+			User user = userService.get(userInSession.username);
 			user.setInterestedCategories(categories);
 			userService.update(user);
 		}
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/get")
 	@ResponseBody
-	public String get(@RequestParam("username") String username, 
-			HttpServletRequest request, HttpServletResponse response){
+	public String get(@RequestParam("username") String username,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User user = userService.getByUsername(username);
-		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		if(user == null || user.getUsername().equals(userInSession.username)){
+		User user = userService.get(username);
+		UserInSession userInSession = (UserInSession) request.getSession()
+				.getAttribute("user");
+		if (user == null || user.getUsername().equals(userInSession.username)) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
 			logger.info("the user does not exists: " + username);
-		}else {
+		} else {
 			UserBrief userBrief = new UserBrief();
 			userBrief.setUsername(username);
 			userBrief.setNickName(user.getNickname());
@@ -192,142 +203,151 @@ public class UserController{
 		}
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/apply_friend")
 	@ResponseBody
-	public String applyFriend(@RequestParam("username") String username, 
-			HttpServletRequest request, HttpServletResponse response){
+	public String applyFriend(@RequestParam("username") String username,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User friend = userService.getByUsername(username);
-		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		if(friend == null ){
+		User friend = userService.get(username);
+		UserInSession userInSession = (UserInSession) request.getSession()
+				.getAttribute("user");
+		if (friend == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
 			logger.info("the user does not exists: " + username);
-		}else if(friend.getRole() != UserRole.USER){
+		} else if (friend.getRole() != UserRole.USER) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户类型不正确");
-			logger.info("the type of user is incorrect: " + username + "/" + friend.getRole());
-		}else if(friend.getUsername().equals(userInSession.username)){
+			logger.info("the type of user is incorrect: " + username + "/"
+					+ friend.getRole());
+		} else if (friend.getUsername().equals(userInSession.username)) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("不允许添加自己为好友");
-			logger.info("Do not allow to apply the user himself for a friend: " + username);
-		}else {
-			User user = userService.getByUsername(userInSession.username);
+			logger.info("Do not allow to apply the user himself for a friend: "
+					+ username);
+		} else {
+			User user = userService.get(userInSession.username);
 			boolean exists = false;
-			if(StringUtils.isNotBlank(user.getFriends())){
-				List<FriendDB> friendDBs = JSON.parseArray(user.getFriends(), FriendDB.class);
-				for(FriendDB friendDB : friendDBs){
-					if(friendDB.getUsername().equals(username)){
+			if (StringUtils.isNotBlank(user.getFriends())) {
+				List<FriendDB> friendDBs = JSON.parseArray(user.getFriends(),
+						FriendDB.class);
+				for (FriendDB friendDB : friendDBs) {
+					if (friendDB.getUsername().equals(username)) {
 						exists = true;
 						break;
 					}
 				}
 			}
-			if(exists){
+			if (exists) {
 				response.setStatus(HttpServletResponse.SC_CONFLICT);
 				result.setError("此用户已经是你的好友");
 				logger.info("the user is already your friend: " + username);
-			}else {
+			} else {
 				Message message = new Message();
 				message.setType(MessageType.FRIEND_APPLICATION);
 				message.setSender(userInSession.username);
 				message.setReceiver(username);
 				message.setDate(new Date());
 				String id = messageService.save(message);
-				logger.info("apply friend: " + userInSession.username + " -> " + username);
+				logger.info("apply friend: " + userInSession.username + " -> "
+						+ username);
 			}
 		}
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/delete_friend")
 	@ResponseBody
-	public String deleteFriend(@RequestParam("username") String username, 
-			HttpServletRequest request, HttpServletResponse response){
+	public String deleteFriend(@RequestParam("username") String username,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		UserInSession userInSession = (UserInSession) request.getSession()
+				.getAttribute("user");
 		userService.deleteFriend(userInSession.username, username);
-		logger.info("delete friend: " + userInSession.username + "->" + username);
+		logger.info("delete friend: " + userInSession.username + "->"
+				+ username);
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/pay_attention")
 	@ResponseBody
-	public String addAttention(@RequestParam("username") String username, 
-			HttpServletRequest request, HttpServletResponse response){
+	public String addAttention(@RequestParam("username") String username,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User org = userService.getByUsername(username);
-		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		if(org == null){
+		User org = userService.get(username);
+		UserInSession userInSession = (UserInSession) request.getSession()
+				.getAttribute("user");
+		if (org == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
 			logger.info("the user does not exists: " + username);
-		}else if(org.getRole() != UserRole.ORG){
+		} else if (org.getRole() != UserRole.ORG) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户类型不正确");
-			logger.info("the type of user is incorrect: " + username + "/" + org.getRole());
-		}else if(org.getUsername().equals(userInSession.username)){
+			logger.info("the type of user is incorrect: " + username + "/"
+					+ org.getRole());
+		} else if (org.getUsername().equals(userInSession.username)) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("不允许关注自己");
-			logger.info("Do not allow to apply the user himself for a friend: " + username);
-		}else {
-			User user = userService.getByUsername(userInSession.username);
+			logger.info("Do not allow to apply the user himself for a friend: "
+					+ username);
+		} else {
+			User user = userService.get(userInSession.username);
 			Result r = userService.payAttention(user, org);
-			if(r != null){
+			if (r != null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				result = r;
-				logger.info("the user has payed attention to the org: " + userInSession.username + "->" + username);
-			}else {
-				logger.info("pay attention: " + userInSession.username + "->" + username);
+				logger.info("the user has payed attention to the org: "
+						+ userInSession.username + "->" + username);
+			} else {
+				logger.info("pay attention: " + userInSession.username + "->"
+						+ username);
 			}
 		}
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/delete_attention")
 	@ResponseBody
 	public String deleteAttention(@RequestParam("username") String username,
-			HttpServletRequest request){
+			HttpServletRequest request) {
 		Result result = new Result();
-		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		UserInSession userInSession = (UserInSession) request.getSession()
+				.getAttribute("user");
 		userService.deleteAttention(userInSession.username, username);
-		logger.info("delete attention: " + userInSession.username + "->" + username);
+		logger.info("delete attention: " + userInSession.username + "->"
+				+ username);
 		return result.toJson();
 	}
-	
+
 	@RequestMapping("/upload_avatar")
 	@ResponseBody
-	public String uploadAvatar(@RequestParam("avatar") MultipartFile avatar, 
-			HttpServletRequest request, HttpServletResponse response){
+	public String uploadAvatar(@RequestParam("avatar") MultipartFile avatar,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		String contentType = avatar.getContentType();
-		if(!contentType.equals("image/jpg") && !contentType.equals("image/jpeg")
-				 && !contentType.equals("image/png") && !contentType.equals("image/gif")){
+		if (!ImageUtil.check(avatar)) {
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
-			result.setError("图片格式须为jpg、jpeg、png或者gif");
-			logger.info("format is not supported: " + contentType);
-		}else {
-			long size = avatar.getSize();
-			if(size > 1048576){
-				response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
-				result.setError("图片大小不能超过1M");
-				logger.info("the size exceeds 1M: " + size);
-			}else {
-				UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-				String contextPath = request.getSession().getServletContext().getRealPath("/");
-				try {
-					imageService.saveAtatar(contextPath, avatar, userInSession.username);
-				} catch (IOException e) {
-					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					result.setError(ExceptionUtils.getFullStackTrace(e));
-					logger.error(ExceptionUtils.getFullStackTrace(e));
-				}
-				logger.info("upload avatar: " + userInSession.username);
+			result.setError("图片格式须为jpg、jpeg、png或者gif并且大小不能超过1M");
+			logger.info("image format is not supported or size > 1M");
+		} else {
+			UserInSession userInSession = (UserInSession) request.getSession()
+					.getAttribute("user");
+			String contextPath = request.getSession().getServletContext()
+					.getRealPath("/");
+			try {
+				imageService.saveAtatar(contextPath, avatar,
+						userInSession.username);
+			} catch (IOException e) {
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				result.setError(ExceptionUtils.getFullStackTrace(e));
+				logger.error(ExceptionUtils.getFullStackTrace(e));
 			}
+			logger.info("upload avatar: " + userInSession.username);
+
 		}
-		
+
 		return result.toJson();
 	}
-	
+
 }

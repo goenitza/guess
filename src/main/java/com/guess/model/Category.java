@@ -5,8 +5,9 @@ import javax.persistence.Entity;
 
 @Entity
 public class Category extends BaseModel{
-	String name;
-	boolean isDeleted = false;
+	private String name;
+	private int questionCount = 0;//how many questions does the category contain
+	private boolean isDeleted = false;
 
 	@Column(nullable = false)
 	public String getName() {
@@ -23,5 +24,13 @@ public class Category extends BaseModel{
 
 	public void setIsDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+	@Column(nullable = false)
+	public int getQuestionCount() {
+		return questionCount;
+	}
+
+	public void setQuestionCount(int questionCount) {
+		this.questionCount = questionCount;
 	}
 }

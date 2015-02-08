@@ -1,4 +1,4 @@
-package com.guess.model;
+package com.guess.enums;
 
 public enum MessageType {
 	SYSTEM, 

@@ -4,21 +4,21 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity
-public class QuestionCategory extends BaseModel{
-	private String questionId;
+public class CategoryQuestion extends BaseModel{
 	private String categoryId;
-	@Column(nullable = false)
-	public String getQuestionId() {
-		return questionId;
-	}
-	public void setQuestionId(String questionId) {
-		this.questionId = questionId;
-	}
+	private String questionId;
 	@Column(nullable = false)
 	public String getCategoryId() {
 		return categoryId;
 	}
 	public void setCategoryId(String categoryId) {
 		this.categoryId = categoryId;
+	}
+	@Column(nullable = false)
+	public String getQuestionId() {
+		return questionId;
+	}
+	public void setQuestionId(String questionId) {
+		this.questionId = questionId;
 	}
 }
