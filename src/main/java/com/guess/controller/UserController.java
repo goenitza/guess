@@ -2,7 +2,9 @@ package com.guess.controller;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,14 +24,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
+import com.guess.constant.Constant;
+import com.guess.enums.CircleType;
 import com.guess.enums.MessageType;
 import com.guess.enums.UserRole;
 import com.guess.model.Category;
+import com.guess.model.Circle;
+import com.guess.model.Individual;
 import com.guess.model.Message;
+import com.guess.model.Organization;
 import com.guess.model.User;
 import com.guess.service.CategoryService;
 import com.guess.service.ImageService;
+import com.guess.service.IndividualService;
 import com.guess.service.MessageService;
+import com.guess.service.OrganizationService;
 import com.guess.service.UserService;
 import com.guess.util.ImageUtil;
 import com.guess.vo.FriendDB;
@@ -51,6 +60,10 @@ public class UserController {
 	private MessageService messageService;
 	@Autowired
 	private ImageService imageService;
+	@Autowired
+	private IndividualService individualService;
+	@Autowired
+	private OrganizationService organizationService;
 
 	@RequestMapping("/register")
 	@ResponseBody
@@ -58,9 +71,8 @@ public class UserController {
 			@RequestParam("username") String username,
 			@RequestParam("password") String password,
 			@RequestParam("passwordConfirm") String passwordConfirm,
-			@RequestParam("email") String email,
 			@RequestParam("role") String role,
-			@RequestParam(value = "nickname", required = false) String nickname,
+			@RequestParam(value = "nickname") String nickname,
 			HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 		Result result = new Result();
@@ -69,46 +81,117 @@ public class UserController {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户角色不存在");
 			logger.info("role does not exists: " + role);
-		} else if (!userService.isUnique(username)) {
-			response.setStatus(HttpServletResponse.SC_CONFLICT);
-			result.setError("用户名已被注册");
-			logger.info("username has been registered: " + username);
-		} else if (!password.equals(passwordConfirm)) {
+			return result.toJson();
+		}
+		
+		Pattern pattern = Pattern
+				.compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
+		Matcher matcher = pattern.matcher(username);
+		if (!matcher.matches()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户名须为邮箱");
+			logger.info("the format of email is incorrect: " + username);
+			return result.toJson();
+		}
+		
+		if (!password.equals(passwordConfirm)) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("两次输入的密码不一致");
 			logger.info("password and passwordConfirm are not same");
-		} else {
-			Pattern pattern = Pattern
-					.compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
-			Matcher matcher = pattern.matcher(email);
-			if (!matcher.matches()) {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				result.setError("邮箱格式不正确");
-				logger.info("the format of email is incorrect: " + email);
-			} else {
-				if (nickname == null)
-					nickname = username;
-				User user = new User();
-				user.setUsername(username);
-				user.setPassword(DigestUtils.md5Hex(password));
-				user.setRole(userRole);
-				user.setEmail(email);
-				user.setNickname(nickname);
+			return result.toJson();
+		}
+		
+		if(userRole == UserRole.INDIVIDUAL){
+			Individual individual = individualService.getByUsername(username);
+			if(individual != null){
+				response.setStatus(HttpServletResponse.SC_CONFLICT);
+				result.setError("用户名已被注册");
+				logger.info("username has been registered: " + username);
+				return result.toJson();
+			}else {
+				Individual in = new Individual();
+				in.setUsername(username);
+				in.setPassword(password);
+				in.setRole(userRole);
+				in.setNickname(nickname);
 				String contextPath = request.getSession().getServletContext()
 						.getRealPath("/");
 				String avatar = imageService.setDefaultAvatar(contextPath,
 						username);
-				user.setAvatar(avatar);
-				String id = userService.save(user);
+				in.setAvatar(avatar);
+				
+				Circle defaultFriendCircle = new Circle();
+				defaultFriendCircle.setType(CircleType.FRIEND_DEFAULT);
+				defaultFriendCircle.setName(Constant.DEFAULT_FRIEND_CIRCLE_NAME);
+				
+				Circle defaultFollowingCircle = new Circle();
+				defaultFollowingCircle.setType(CircleType.FOLLOWING_DEFAULT);
+				defaultFollowingCircle.setName(Constant.DEFAULT_FOLLOWING_CIRCLE_NAME);
+				
+				Set<Circle> circles = new HashSet<Circle>();
+				circles.add(defaultFriendCircle);
+				circles.add(defaultFollowingCircle);
+				
+				in.setCircles(circles);
+				
+				String id = individualService.save(in);
 				UserInSession userInSession = new UserInSession();
-				userInSession.username = username;
-				userInSession.role = UserRole.USER;
+				userInSession.id = id;
+				userInSession.role = UserRole.INDIVIDUAL;
 				request.getSession().setAttribute("user", userInSession);
-				// result.set("id", id);
-				logger.info("user regisger: " + username);
+				result.set("id", id);
+				logger.info("individual register: " + username);
+				return result.toJson();
 			}
+		}else if(userRole == UserRole.ORG){
+			Organization organization = organizationService.getByUsername(username);
+			if(organization != null){
+				response.setStatus(HttpServletResponse.SC_CONFLICT);
+				result.setError("用户名已被注册");
+				logger.info("username has been registered: " + username);
+				return result.toJson();
+			}else {
+				Organization org = new Organization();
+				org.setUsername(username);
+				org.setPassword(password);
+				org.setRole(userRole);
+				org.setNickname(nickname);
+				String contextPath = request.getSession().getServletContext()
+						.getRealPath("/");
+				String avatar = imageService.setDefaultAvatar(contextPath,
+						username);
+				org.setAvatar(avatar);
+				
+				Circle defaultFriendCircle = new Circle();
+				defaultFriendCircle.setType(CircleType.FOLLOWER_DEFAULT);
+				defaultFriendCircle.setName(Constant.DEFAULT_FOLLOWER_CIRCLE_NAME);
+				
+				Circle defaultFollowingCircle = new Circle();
+				defaultFollowingCircle.setType(CircleType.FOLLOWING_DEFAULT);
+				defaultFollowingCircle.setName(Constant.DEFAULT_FOLLOWING_CIRCLE_NAME);
+				
+				Set<Circle> circles = new HashSet<Circle>();
+				circles.add(defaultFriendCircle);
+				circles.add(defaultFollowingCircle);
+				
+				org.setCircles(circles);
+				
+				String id = organizationService.save(org);
+				UserInSession userInSession = new UserInSession();
+				userInSession.id = id;
+				userInSession.role = UserRole.INDIVIDUAL;
+				request.getSession().setAttribute("user", userInSession);
+				result.set("id", id);
+				logger.info("organization register: " + username);
+				return result.toJson();
+			}
+		}else {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户角色不存在");
+			logger.info("role does not exists: " + role);
+			return result.toJson();
 		}
-		return result.toJson();
+		
 	}
 
 	@RequestMapping("/login")

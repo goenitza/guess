@@ -1,34 +1,28 @@
 package com.guess.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import java.util.Set;
 
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
 
 import com.guess.enums.UserRole;
 
-@Entity
-public class User{
+@MappedSuperclass
+public class User extends BaseModel{
 	
-	private String username;
+	private String username;//email
 	private String password;
 	private UserRole role;
 	private String nickname;
-	private String email;
 	private String avatar;
-	private boolean isVerified = false;
 	private boolean isFrozen = false;
-	private String realname;
 	private String interestedCategories;
-	private String friends;// friends are followers for org
-	private String orgs;// orgs those the users pay attention to 
-	private String circles;
+	private Set<Circle> circles;
 	
-	@Id
-	@GenericGenerator(name = "assigned", strategy = "assigned")
-	@GeneratedValue(generator = "assigned")
+	@Column(nullable = false)
 	public String getUsername() {
 		return username;
 	}
@@ -57,25 +51,11 @@ public class User{
 		this.nickname = nickname;
 	}
 	@Column(nullable = false)
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	@Column(nullable = false)
 	public String getAvatar() {
 		return avatar;
 	}
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
-	}
-	@Column
-	public boolean getIsVerified() {
-		return isVerified;
-	}
-	public void setIsVerified(boolean isVerified) {
-		this.isVerified = isVerified;
 	}
 	@Column
 	public boolean getIsFrozen() {
@@ -84,13 +64,6 @@ public class User{
 	public void setIsFrozen(boolean isFrozen) {
 		this.isFrozen = isFrozen;
 	}
-	@Column
-	public String getRealname() {
-		return realname;
-	}
-	public void setRealname(String realname) {
-		this.realname = realname;
-	}
 	@Column(length = 3000)
 	public String getInterestedCategories() {
 		return interestedCategories;
@@ -98,46 +71,11 @@ public class User{
 	public void setInterestedCategories(String interestedCategories) {
 		this.interestedCategories = interestedCategories;
 	}
-	@Column
-	public String getFriends() {
-		return friends;
-	}
-	public void setFriends(String friends) {
-		this.friends = friends;
-	}
-	@Column
-	public String getOrgs() {
-		return orgs;
-	}
-	public void setOrgs(String orgs) {
-		this.orgs = orgs;
-	}
-	@Column
-	public String getCircles() {
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	public Set<Circle> getCircles() {
 		return circles;
 	}
-	public void setCircles(String circles) {
+	public void setCircles(Set<Circle> circles) {
 		this.circles = circles;
-	}
-
-	@Override
-	public boolean equals(Object object){
-		if(object == null){
-			return false;
-		}
-		if(object instanceof User){
-			User user = (User) object;
-			if(this.getUsername() == null || user.getUsername() == null){
-				return false;
-			}
-			return (this.getUsername().equals(user.getUsername()));
-		}
-		return false;
-	}
-	
-	@Override
-	public int hashCode() {
-		return username == null ? System.identityHashCode(this) 
-				: (this.getClass().getName() + this.getUsername()).hashCode();
 	}
 }

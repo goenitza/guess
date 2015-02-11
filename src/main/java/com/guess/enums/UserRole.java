@@ -1,5 +1,5 @@
 package com.guess.enums;
 
 public enum UserRole {
-	GUEST,USER, ORG
+	GUEST,INDIVIDUAL, ORG
 }

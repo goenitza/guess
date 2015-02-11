@@ -15,4 +15,8 @@ public class Constant {
 	public static final String[] IMAGE_FORMATS = {"image/png", "image/jpg", 
 			"image/jpeg", "image/gif"};
 	public static final long IMAGE_SIZE = 1024*1024;
+	
+	public static final String DEFAULT_FRIEND_CIRCLE_NAME = "我的好友";
+	public static final String DEFAULT_FOLLOWING_CIRCLE_NAME = "我的关注";
+	public static final String DEFAULT_FOLLOWER_CIRCLE_NAME = "我的粉丝";
 }
