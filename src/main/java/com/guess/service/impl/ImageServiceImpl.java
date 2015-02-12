@@ -16,6 +16,7 @@ public class ImageServiceImpl implements ImageService{
 	//set default avatar for user
 	public String setDefaultAvatar(String contextPath, String fileName) throws IOException {
 		Thumbnails.of(contextPath + Constant.DEFAULT_AVATAR)
+			.outputFormat(Constant.IMAGE_DEFAUlT_FORMAT)
 			.scale(1)
 			.toFile(contextPath + Constant.AVATAR_STORAGE_PATH + fileName);
 		return Constant.AVATAR_STORAGE_PATH + fileName + "." + Constant.IMAGE_DEFAUlT_FORMAT;

@@ -35,15 +35,16 @@ import com.guess.model.Message;
 import com.guess.model.Organization;
 import com.guess.model.User;
 import com.guess.service.CategoryService;
+import com.guess.service.CircleUserService;
 import com.guess.service.ImageService;
 import com.guess.service.IndividualService;
 import com.guess.service.MessageService;
 import com.guess.service.OrganizationService;
 import com.guess.service.UserService;
 import com.guess.util.ImageUtil;
-import com.guess.vo.FriendDB;
+import com.guess.vo.IndividualVO;
+import com.guess.vo.OrgVO;
 import com.guess.vo.Result;
-import com.guess.vo.UserBrief;
 import com.guess.vo.UserInSession;
 
 @Controller
@@ -64,6 +65,8 @@ public class UserController {
 	private IndividualService individualService;
 	@Autowired
 	private OrganizationService organizationService;
+	@Autowired
+	private CircleUserService circleUserService;
 
 	@RequestMapping("/register")
 	@ResponseBody
@@ -76,8 +79,11 @@ public class UserController {
 			HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 		Result result = new Result();
-		UserRole userRole = UserRole.valueOf(StringUtils.upperCase(role));
-		if (userRole == null) {
+		UserRole userRole = null;
+		try {
+			userRole = UserRole.valueOf(StringUtils.upperCase(role));
+			
+		} catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户角色不存在");
 			logger.info("role does not exists: " + role);
@@ -114,11 +120,7 @@ public class UserController {
 				in.setPassword(password);
 				in.setRole(userRole);
 				in.setNickname(nickname);
-				String contextPath = request.getSession().getServletContext()
-						.getRealPath("/");
-				String avatar = imageService.setDefaultAvatar(contextPath,
-						username);
-				in.setAvatar(avatar);
+				in.setAvatar(Constant.DEFAULT_AVATAR);
 				
 				Circle defaultFriendCircle = new Circle();
 				defaultFriendCircle.setType(CircleType.FRIEND_DEFAULT);
@@ -137,7 +139,11 @@ public class UserController {
 				String id = individualService.save(in);
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
+				userInSession.username = username;
 				userInSession.role = UserRole.INDIVIDUAL;
+				userInSession.nickname = nickname;
+				userInSession.avatar = Constant.DEFAULT_AVATAR;
+				
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
 				logger.info("individual register: " + username);
@@ -156,11 +162,8 @@ public class UserController {
 				org.setPassword(password);
 				org.setRole(userRole);
 				org.setNickname(nickname);
-				String contextPath = request.getSession().getServletContext()
-						.getRealPath("/");
-				String avatar = imageService.setDefaultAvatar(contextPath,
-						username);
-				org.setAvatar(avatar);
+				
+				org.setAvatar(Constant.DEFAULT_AVATAR);
 				
 				Circle defaultFriendCircle = new Circle();
 				defaultFriendCircle.setType(CircleType.FOLLOWER_DEFAULT);
@@ -179,7 +182,11 @@ public class UserController {
 				String id = organizationService.save(org);
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
+				userInSession.username = username;
 				userInSession.role = UserRole.INDIVIDUAL;
+				userInSession.nickname = nickname;
+				userInSession.avatar = Constant.DEFAULT_AVATAR;
+				
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
 				logger.info("organization register: " + username);
@@ -198,9 +205,33 @@ public class UserController {
 	@ResponseBody
 	public String login(@RequestParam("username") String username,
 			@RequestParam("password") String password,
+			@RequestParam("role") String role, 
 			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User user = userService.get(username);
+		UserRole userRole = null;
+		try {
+			userRole = UserRole.valueOf(StringUtils.upperCase(role));
+			
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户角色不存在");
+			logger.info("role does not exists: " + role);
+			return result.toJson();
+		}
+		
+		User user = null;
+		if(userRole == UserRole.INDIVIDUAL){
+			user = individualService.getByUsername(username);
+		}else if (userRole == UserRole.ORG) {
+			user = organizationService.getByUsername(username);
+		}else {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户角色不存在");
+			logger.info("role does not exists: " + role);
+			return result.toJson();
+		}
+		
+	
 		if (user == null
 				|| !user.getPassword().equals(DigestUtils.md5Hex(password))) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -212,10 +243,14 @@ public class UserController {
 			logger.info("the user has been frozen: " + username);
 		} else {
 			UserInSession userInSession = new UserInSession();
+			userInSession.id = user.getId();
+			userInSession.role = userRole;
 			userInSession.username = username;
-			userInSession.role = UserRole.USER;
+			userInSession.nickname = user.getNickname();
+			userInSession.avatar = user.getAvatar();
+			
 			request.getSession().setAttribute("user", userInSession);
-			// result.set("id", user.getId());
+			 result.set("id", user.getId());
 			logger.info("user login: " + username);
 		}
 		return result.toJson();
@@ -225,12 +260,13 @@ public class UserController {
 	@ResponseBody
 	public String logout(HttpServletRequest request) {
 		Result result = new Result();
-		User user = (User) request.getSession().getAttribute("user");
-		String username = null;
-		if (user != null)
-			username = user.getUsername();
-		request.getSession().removeAttribute("user");
-		logger.info("user logout: " + username);
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		String id = "";
+		if (userInSession != null){
+			id = userInSession.id;
+			request.getSession().removeAttribute("user");
+		}
+		logger.info("user logout: " + id);
 		return result.toJson();
 	}
 
@@ -240,24 +276,30 @@ public class UserController {
 			@RequestParam("categories") String categories,
 			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		List<Category> cgs = JSON.parseArray(categories, Category.class);
-		List<Category> cgsDB = categoryService.getAllList();
-		boolean hasError = false;
-		for (Category c : cgs) {
-			if (!cgsDB.contains(c)) {
-				hasError = true;
+		List<Category> interestedCategories = JSON.parseArray(categories, Category.class);
+		List<Category> categoriyList = categoryService.getAllList();
+		for (Category c : interestedCategories) {
+			if (!categoriyList.contains(c)) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				result.setError(c.getName() + "不存在");
 				logger.info("category does not exists: " + c.getName());
-				break;
+				return result.toJson();
 			}
 		}
-		if (!hasError) {
-			UserInSession userInSession = (UserInSession) request.getSession()
-					.getAttribute("user");
-			User user = userService.get(userInSession.username);
-			user.setInterestedCategories(categories);
-			userService.update(user);
+		UserInSession userInSession = (UserInSession) request.getSession()
+				.getAttribute("user");
+		if(userInSession.role == UserRole.INDIVIDUAL){
+			Individual individual = individualService.get(userInSession.id);
+			individual.setInterestedCategories(JSON.toJSONString(interestedCategories));
+			individualService.update(individual);
+		}else if(userInSession.role == UserRole.ORG){
+			Organization organization = organizationService.get(userInSession.id);
+			organization.setInterestedCategories(JSON.toJSONString(interestedCategories));
+			organizationService.update(organization);
+		}else {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户角色不存在");
+			logger.info("role does not exists: " + userInSession.role);
 		}
 		return result.toJson();
 	}
@@ -265,142 +307,154 @@ public class UserController {
 	@RequestMapping("/get")
 	@ResponseBody
 	public String get(@RequestParam("username") String username,
+			@RequestParam("role") String role,
 			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User user = userService.get(username);
-		UserInSession userInSession = (UserInSession) request.getSession()
-				.getAttribute("user");
-		if (user == null || user.getUsername().equals(userInSession.username)) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			result.setError("找不到此用户");
-			logger.info("the user does not exists: " + username);
-		} else {
-			UserBrief userBrief = new UserBrief();
-			userBrief.setUsername(username);
-			userBrief.setNickName(user.getNickname());
-			userBrief.setAvatar(user.getAvatar());
-			userBrief.setRole(user.getRole());
-			userBrief.setIsVerified(user.getIsVerified());
-			result.set("user", userBrief);
-			logger.info("get user: " + username);
+		UserRole userRole = null;
+		try {
+			userRole = UserRole.valueOf(StringUtils.upperCase(role));
+			
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("用户角色不存在");
+			logger.info("role does not exists: " + role);
+			return result.toJson();
 		}
+		
+		//individual
+		if(userRole == UserRole.INDIVIDUAL){
+			Individual individual = individualService.getByUsername(username);
+			if(individual == null){
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				result.setError("用户不存在");
+				logger.info("user does not exist: " + username);
+			}else {
+				IndividualVO individualVO = new IndividualVO();
+				individualVO.setId(individual.getId());
+				individualVO.setUsername(individual.getUsername());
+				individualVO.setNickname(individual.getNickname());
+				individualVO.setAvatar(individual.getAvatar());
+				result.set("user", JSON.toJSON(individualVO));
+				logger.info("get user: " + username);
+			}
+			return result.toJson();
+		}
+		
+		//org
+		if(userRole == UserRole.ORG){
+			Organization organization = organizationService.getByUsername(username);
+			if(organization == null){
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				result.setError("用户不存在");
+				logger.info("user does not exist: " + username);
+			}else {
+				OrgVO orgVO = new OrgVO();
+				orgVO.setId(organization.getId());
+				orgVO.setUsername(organization.getUsername());
+				orgVO.setNickname(organization.getNickname());
+				orgVO.setAvatar(organization.getAvatar());
+				orgVO.setIsVerified(organization.getIsVerified());
+				result.set("user", JSON.toJSON(organization));
+				logger.info("get user: " + username);
+			}
+			return result.toJson();
+		}
+		
+		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		result.setError("用户角色不存在");
+		logger.info("role does not exists: " + role);
 		return result.toJson();
 	}
 
 	@RequestMapping("/apply_friend")
 	@ResponseBody
-	public String applyFriend(@RequestParam("username") String username,
+	public String applyFriend(@RequestParam("id") String id,
 			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User friend = userService.get(username);
-		UserInSession userInSession = (UserInSession) request.getSession()
-				.getAttribute("user");
-		if (friend == null) {
+		Individual individual = individualService.get(id);
+		if(individual == null){
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
-			logger.info("the user does not exists: " + username);
-		} else if (friend.getRole() != UserRole.USER) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("用户类型不正确");
-			logger.info("the type of user is incorrect: " + username + "/"
-					+ friend.getRole());
-		} else if (friend.getUsername().equals(userInSession.username)) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("不允许添加自己为好友");
-			logger.info("Do not allow to apply the user himself for a friend: "
-					+ username);
-		} else {
-			User user = userService.get(userInSession.username);
-			boolean exists = false;
-			if (StringUtils.isNotBlank(user.getFriends())) {
-				List<FriendDB> friendDBs = JSON.parseArray(user.getFriends(),
-						FriendDB.class);
-				for (FriendDB friendDB : friendDBs) {
-					if (friendDB.getUsername().equals(username)) {
-						exists = true;
-						break;
-					}
-				}
-			}
-			if (exists) {
-				response.setStatus(HttpServletResponse.SC_CONFLICT);
-				result.setError("此用户已经是你的好友");
-				logger.info("the user is already your friend: " + username);
-			} else {
-				Message message = new Message();
-				message.setType(MessageType.FRIEND_APPLICATION);
-				message.setSender(userInSession.username);
-				message.setReceiver(username);
-				message.setDate(new Date());
-				String id = messageService.save(message);
-				logger.info("apply friend: " + userInSession.username + " -> "
-						+ username);
-			}
+			logger.info("the user does not exists: " + id);
+			return result.toJson();
 		}
-		return result.toJson();
-	}
-
-	@RequestMapping("/delete_friend")
-	@ResponseBody
-	public String deleteFriend(@RequestParam("username") String username,
-			HttpServletRequest request, HttpServletResponse response) {
-		Result result = new Result();
+		
 		UserInSession userInSession = (UserInSession) request.getSession()
 				.getAttribute("user");
-		userService.deleteFriend(userInSession.username, username);
-		logger.info("delete friend: " + userInSession.username + "->"
-				+ username);
+		if(individual.getId().equals(userInSession.id)){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("不允许添加自己为好友");
+			logger.info("Do not allow to apply the user himself for a friend: "+ id);
+			return result.toJson();
+		}
+		
+		if(circleUserService.exists(userInSession.id, id)){
+			response.setStatus(HttpServletResponse.SC_CONFLICT);
+			result.setError("此用户已经是你的好友");
+			logger.info("the user is already your friend: " + id);
+			return result.toJson();
+		}
+		
+		Message message = new Message();
+		message.setType(MessageType.FRIEND_APPLICATION);
+		message.setReceiverId(id);
+		message.setSenderId(userInSession.id);
+		message.setSenderNickname(userInSession.nickname);
+		message.setSenderAvatar(userInSession.avatar);
+		message.setDate(new Date());
+		messageService.save(message);
+		logger.info("apply friend: " + userInSession.id + " -> " + id);
+		
 		return result.toJson();
 	}
 
 	@RequestMapping("/pay_attention")
 	@ResponseBody
-	public String addAttention(@RequestParam("username") String username,
+	public String addAttention(@RequestParam("id") String id,
 			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
-		User org = userService.get(username);
+		
 		UserInSession userInSession = (UserInSession) request.getSession()
 				.getAttribute("user");
+		
+		Organization org = organizationService.get(id);
 		if (org == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
-			logger.info("the user does not exists: " + username);
-		} else if (org.getRole() != UserRole.ORG) {
+			logger.info("the user does not exists: " + id);
+			return result.toJson();
+		} 
+		
+		if (org.getRole() != UserRole.ORG) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("用户类型不正确");
-			logger.info("the type of user is incorrect: " + username + "/"
-					+ org.getRole());
-		} else if (org.getUsername().equals(userInSession.username)) {
+			logger.info("the type of user is incorrect: " + id + "/" + org.getRole());
+			return result.toJson();
+		} 
+		
+		if (org.getId().equals(userInSession.id)) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			result.setError("不允许关注自己");
-			logger.info("Do not allow to apply the user himself for a friend: "
-					+ username);
-		} else {
-			User user = userService.get(userInSession.username);
-			Result r = userService.payAttention(user, org);
-			if (r != null) {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				result = r;
-				logger.info("the user has payed attention to the org: "
-						+ userInSession.username + "->" + username);
-			} else {
-				logger.info("pay attention: " + userInSession.username + "->"
-						+ username);
-			}
-		}
+			logger.info("Do not allow to apply the user himself for a friend: " + id);
+			return result.toJson();
+		} 
+		
+		circleUserService.payAttention(userInSession.id, id, userInSession.role);
+		logger.info("pay attention: " + userInSession.id + "->" + id);
+
 		return result.toJson();
 	}
 
-	@RequestMapping("/delete_attention")
+	@RequestMapping(value = {"/delete_friend", "/delete_attention"})
 	@ResponseBody
-	public String deleteAttention(@RequestParam("username") String username,
-			HttpServletRequest request) {
+	public String deleteFriend(@RequestParam("id") String id,
+			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
 		UserInSession userInSession = (UserInSession) request.getSession()
 				.getAttribute("user");
-		userService.deleteAttention(userInSession.username, username);
-		logger.info("delete attention: " + userInSession.username + "->"
-				+ username);
+		circleUserService.deleteFollowingAndFollower(userInSession.id, id);
+		
+		logger.info("delete friend: " + userInSession.id + "->" + id);
 		return result.toJson();
 	}
 
@@ -420,14 +474,13 @@ public class UserController {
 					.getRealPath("/");
 			try {
 				imageService.saveAtatar(contextPath, avatar,
-						userInSession.username);
+						userInSession.id);
 			} catch (IOException e) {
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				result.setError(ExceptionUtils.getFullStackTrace(e));
 				logger.error(ExceptionUtils.getFullStackTrace(e));
 			}
-			logger.info("upload avatar: " + userInSession.username);
-
+			logger.info("upload avatar: " + userInSession.id);
 		}
 
 		return result.toJson();

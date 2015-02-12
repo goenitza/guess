@@ -10,8 +10,10 @@ import com.guess.enums.MessageType;
 @Entity
 public class Message extends BaseModel{
 	private MessageType type;
-	private String receiver;
-	private String sender;
+	private String receiverId;
+	private String senderId;
+	private String senderNickname;
+	private String senderAvatar;
 	private String relatedObject;// 
 	private String content;
 	private Date date;
@@ -24,18 +26,32 @@ public class Message extends BaseModel{
 		this.type = type;
 	}
 	@Column(nullable = false)
-	public String getReceiver() {
-		return receiver;
+	public String getReceiverId() {
+		return receiverId;
 	}
-	public void setReceiver(String receiver) {
-		this.receiver = receiver;
+	public void setReceiverId(String receiverId) {
+		this.receiverId = receiverId;
+	}
+	@Column(nullable = false)
+	public String getSenderId() {
+		return senderId;
+	}
+	public void setSenderId(String senderId) {
+		this.senderId = senderId;
 	}
 	@Column()
-	public String getSender() {
-		return sender;
+	public String getSenderNickname() {
+		return senderNickname;
 	}
-	public void setSender(String sender) {
-		this.sender = sender;
+	public void setSenderNickname(String senderNickname) {
+		this.senderNickname = senderNickname;
+	}
+	@Column()
+	public String getSenderAvatar() {
+		return senderAvatar;
+	}
+	public void setSenderAvatar(String senderAvatar) {
+		this.senderAvatar = senderAvatar;
 	}
 	@Column()
 	public String getRelatedObject() {
