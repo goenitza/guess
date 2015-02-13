@@ -104,36 +104,41 @@ Request:
 3. G收到A关注的消息
 
 **查找用户** 
+Request:  
 ```js
-/user/get?username=user1
+/user/get?username=user2@163.com&role=individual
 ```
+Response:  
 ```js
     {
        "user":
        {
-           "avatar": "/default_avatar.jpg",
-           "isVerified": false,
-           "nickName": "user1",
-           "role": "USER",
-           "username": "user1"
+           "avatar": "resources\avatar\8af529b94b81d035014b81eab24c0003.gif",
+           "id": "8af529b94b81d035014b81eab24c0003",
+           "nickname": "user2",
+           "username": "user2@163.com"
        }
     }
 ```
 **申请添加好友（针对普通用户）**  
+Request:  
 ```js
-/user/apply_friend?username=user1
+/user/apply_friend?id=8af529b94b81d035014b81eab24c0003
 ```
 **删除好友**  
+Request:  
 ```js
-/user/delete_friend?username=user1
+/user/delete_friend?id=8af529b94b81d035014b81eab24c0003
 ```
-**添加关注（针对组织）**  
+**添加关注（针对组织）** 
+Request:  
 ```js
-/user/pay_attention?username=org
+/user/pay_attention?id=8af529b94b81d035014b81f3c1c80007
 ```
 **删除关注（针对组织）**  
+Request:  
 ```js
-/user/delete_attention?username=org
+/user/delete_attention?id=8af529b94b81d035014b81f3c1c80007
 ```
 ### 消息处理
 
@@ -189,19 +194,23 @@ Request:
 </table>
 
 **获取登录用户的所有消息**  
+Request:  
 ```js
 /user/message/get_all
 ```
+Response:  
 ```js
     {
        "messages":
        [
            {
-               "date": "2015-02-03 15:38:43",
-               "id": "8af529b94b4e1d3f014b4e6085950004",
+               "date": "2015-02-13 15:58:00",
+               "id": "8af529b94b81d035014b81f1c34f0006",
                "isProcessed": false,
-               "receiver": "user1",
-               "sender": "user",
+               "receiverId": "8af529b94b81d035014b81eab24c0003",
+               "senderAvatar": "resources\avatar\8af529b94b81d035014b81d2271f0000.gif",
+               "senderId": "8af529b94b81d035014b81d2271f0000",
+               "senderNickname": "user",
                "type": "FRIEND_APPLICATION"
            }
        ]
@@ -209,21 +218,29 @@ Request:
 ```
 **设置消息为已读**  
 *id:消息ID*
+Request:  
 ```js
 /user/message/set_processed?id=8af529b94b4e1d3f014b4e861b0a0005  
 ```
 
-**删除消息**  
-*ids：待删除的消息ID，多个ID之间用逗号分隔*
+**删除消息**
+Request:  
 ```js
 /user/message/delete?ids=8af529b94b4e1d3f014b4e861b0a0005  
 ```
+Params:  
+* ids：待删除的消息ID，多个ID之间用逗号分隔
 **处理好友申请消息**  
 *id：消息ID*  
 *isAgreed：是否同意加对方为好友*
+Request:  
 ```js
-/user/message/process_friend_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true  
+/user/message/process_friend_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true&circleId=circlename  
 ```
+Params:  
+* id:消息ID
+* isAgreed:是否同意添加好友请求
+* circleId:朋友圈ID，同意好友请求后会将此好友添加到这个朋友圈中，若无此参数，则添加到缺省的朋友圈中。
 
 
 
