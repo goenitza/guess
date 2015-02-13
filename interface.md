@@ -69,16 +69,24 @@ Parameter：
 * role为用户角色：individual——普通用户、org——企业用户  
   
 Response:
-```
+```js
 {
    "id": "8af529b94b81d035014b81d2271f0000"
 }
 ```
 **登录**  
+Request:  
 ```js
-/user/login?username=user&password=user
+/user/login?username=user@163.com&password=user&role=individual
+```
+Response:  
+```js
+{
+   "id": "8af529b94b81d035014b81d2271f0000"
+}
 ```
 **注销**  
+Request:  
 ```js
 /user/logout
 ```
