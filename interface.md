@@ -230,8 +230,9 @@ Request:
 ```
 Params:  
 * ids：待删除的消息ID，多个ID之间用逗号分隔  
+
 **处理好友申请消息**  
-加对方为好友*
+加对方为好友*  
 Request:  
 ```js
 /user/message/process_friend_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true&circleId=circlename  
