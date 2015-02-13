@@ -5,21 +5,14 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.guess.dao.MessageDao;
-import com.guess.enums.MessageType;
 import com.guess.model.Message;
 
 @Component
 public class MessageDaoImpl extends BaseDaoImpl<Message, String> implements MessageDao{
 
-	public List<Message> getByUser(String username) {
-		String query = "from Message m where m.receiver = ?";
-		List<Message> messages = hibernateTemplate.find(query, username);
-		return messages;
-	}
-
-	public List<Message> getByType(String username, MessageType messageType) {
-		String query = "from Message m where m.receiver = ? and m.type = ?";
-		List<Message> messages = hibernateTemplate.find(query, username, messageType);
+	public List<Message> getAll(String receiverId) {
+		String query = "from Message m where m.receiverId = ?";
+		List<Message> messages = hibernateTemplate.find(query, receiverId);
 		return messages;
 	}
 }

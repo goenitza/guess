@@ -18,19 +18,20 @@ public class Message extends BaseModel{
 	private String content;
 	private Date date;
 	private boolean isProcessed;
-	@Column(nullable = false)
-	public MessageType getType() {
-		return type;
-	}
-	public void setType(MessageType type) {
-		this.type = type;
-	}
+	
 	@Column(nullable = false)
 	public String getReceiverId() {
 		return receiverId;
 	}
 	public void setReceiverId(String receiverId) {
 		this.receiverId = receiverId;
+	}
+	@Column(nullable = false)
+	public MessageType getType() {
+		return type;
+	}
+	public void setType(MessageType type) {
+		this.type = type;
 	}
 	@Column(nullable = false)
 	public String getSenderId() {

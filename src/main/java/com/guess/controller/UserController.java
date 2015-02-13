@@ -117,10 +117,10 @@ public class UserController {
 			}else {
 				Individual in = new Individual();
 				in.setUsername(username);
-				in.setPassword(password);
+				in.setPassword(DigestUtils.md5Hex(password));
 				in.setRole(userRole);
 				in.setNickname(nickname);
-				in.setAvatar(Constant.DEFAULT_AVATAR);
+				//in.setAvatar(Constant.DEFAULT_AVATAR);
 				
 				Circle defaultFriendCircle = new Circle();
 				defaultFriendCircle.setType(CircleType.FRIEND_DEFAULT);
@@ -133,10 +133,12 @@ public class UserController {
 				Set<Circle> circles = new HashSet<Circle>();
 				circles.add(defaultFriendCircle);
 				circles.add(defaultFollowingCircle);
-				
 				in.setCircles(circles);
 				
-				String id = individualService.save(in);
+				String contextPath = request.getSession().getServletContext().getRealPath("/");
+				
+				String id = individualService.save(in, contextPath);
+				
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
 				userInSession.username = username;
@@ -163,7 +165,7 @@ public class UserController {
 				org.setRole(userRole);
 				org.setNickname(nickname);
 				
-				org.setAvatar(Constant.DEFAULT_AVATAR);
+				//org.setAvatar(Constant.DEFAULT_AVATAR);
 				
 				Circle defaultFriendCircle = new Circle();
 				defaultFriendCircle.setType(CircleType.FOLLOWER_DEFAULT);
@@ -176,14 +178,16 @@ public class UserController {
 				Set<Circle> circles = new HashSet<Circle>();
 				circles.add(defaultFriendCircle);
 				circles.add(defaultFollowingCircle);
-				
 				org.setCircles(circles);
 				
-				String id = organizationService.save(org);
+				String contextPath = request.getSession().getServletContext().getRealPath("/");
+				
+				String id = organizationService.save(org, contextPath);
+				
 				UserInSession userInSession = new UserInSession();
 				userInSession.id = id;
 				userInSession.username = username;
-				userInSession.role = UserRole.INDIVIDUAL;
+				userInSession.role = UserRole.ORG;
 				userInSession.nickname = nickname;
 				userInSession.avatar = Constant.DEFAULT_AVATAR;
 				
@@ -371,20 +375,23 @@ public class UserController {
 	public String applyFriend(@RequestParam("id") String id,
 			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
+		
+		UserInSession userInSession = (UserInSession) request.getSession()
+				.getAttribute("user");
+		
+		if(id.equals(userInSession.id)){
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("不允许添加自己为好友");
+			logger.info("Do not allow to apply the user himself for a friend: "+ id);
+			return result.toJson();
+		}
+		
 		Individual individual = individualService.get(id);
+		
 		if(individual == null){
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
 			logger.info("the user does not exists: " + id);
-			return result.toJson();
-		}
-		
-		UserInSession userInSession = (UserInSession) request.getSession()
-				.getAttribute("user");
-		if(individual.getId().equals(userInSession.id)){
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("不允许添加自己为好友");
-			logger.info("Do not allow to apply the user himself for a friend: "+ id);
 			return result.toJson();
 		}
 		
@@ -417,7 +424,15 @@ public class UserController {
 		UserInSession userInSession = (UserInSession) request.getSession()
 				.getAttribute("user");
 		
+		if (id.equals(userInSession.id)) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			result.setError("不允许关注自己");
+			logger.info("Do not allow to apply the user himself for a friend: " + id);
+			return result.toJson();
+		} 
+		
 		Organization org = organizationService.get(id);
+		
 		if (org == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			result.setError("找不到此用户");
@@ -425,21 +440,14 @@ public class UserController {
 			return result.toJson();
 		} 
 		
-		if (org.getRole() != UserRole.ORG) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("用户类型不正确");
-			logger.info("the type of user is incorrect: " + id + "/" + org.getRole());
+		if(circleUserService.exists(userInSession.id, id)){
+			response.setStatus(HttpServletResponse.SC_CONFLICT);
+			result.setError("您已关注此用户");
+			logger.info("You have already payed attention to this user: " + id);
 			return result.toJson();
-		} 
+		}
 		
-		if (org.getId().equals(userInSession.id)) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			result.setError("不允许关注自己");
-			logger.info("Do not allow to apply the user himself for a friend: " + id);
-			return result.toJson();
-		} 
-		
-		circleUserService.payAttention(userInSession.id, id, userInSession.role);
+		circleUserService.payAttention(userInSession.id, id, userInSession.role, userInSession.nickname);
 		logger.info("pay attention: " + userInSession.id + "->" + id);
 
 		return result.toJson();
@@ -447,14 +455,14 @@ public class UserController {
 
 	@RequestMapping(value = {"/delete_friend", "/delete_attention"})
 	@ResponseBody
-	public String deleteFriend(@RequestParam("id") String id,
+	public String deleteFriendOrAttention(@RequestParam("id") String id,
 			HttpServletRequest request, HttpServletResponse response) {
 		Result result = new Result();
 		UserInSession userInSession = (UserInSession) request.getSession()
 				.getAttribute("user");
 		circleUserService.deleteFollowingAndFollower(userInSession.id, id);
 		
-		logger.info("delete friend: " + userInSession.id + "->" + id);
+		logger.info("delete friend or attention: " + userInSession.id + "->" + id);
 		return result.toJson();
 	}
 
@@ -485,5 +493,4 @@ public class UserController {
 
 		return result.toJson();
 	}
-
 }

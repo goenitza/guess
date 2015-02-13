@@ -12,28 +12,28 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.guess.vo.Result;
 
-//@ControllerAdvice
+@ControllerAdvice
 public class GlobalDefaultExceptionHandler{
 	
-//	private static Logger logger = LogManager.getLogger(GlobalDefaultExceptionHandler.class);
-//	
-//	@ExceptionHandler(MissingServletRequestParameterException.class)
-//	@ResponseBody
-//	@ResponseStatus(HttpStatus.BAD_REQUEST)
-//	public String missingServletRequestParameterExceptionHandler(Exception e) {
-//		Result result = new Result();
-//		logger.error(ExceptionUtils.getStackTrace(e));
-//		result.setError(e.getMessage());
-//		return result.toJson();
-//	}
-//	
-//	@ExceptionHandler(Exception.class)
-//	@ResponseBody
-//	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//	public String defaultExceptionHandler(Exception e) {
-//		Result result = new Result();
-//		logger.error(ExceptionUtils.getStackTrace(e));
-//		result.setError(e.getMessage() != null ? e.getMessage() : "server internal error");
-//		return result.toJson();
-//	}
+	private static Logger logger = LogManager.getLogger(GlobalDefaultExceptionHandler.class);
+	
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String missingServletRequestParameterExceptionHandler(Exception e) {
+		Result result = new Result();
+		logger.error(ExceptionUtils.getStackTrace(e));
+		result.setError(e.getMessage());
+		return result.toJson();
+	}
+	
+	@ExceptionHandler(Exception.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public String defaultExceptionHandler(Exception e) {
+		Result result = new Result();
+		logger.error(ExceptionUtils.getStackTrace(e));
+		result.setError(e.getMessage() != null ? e.getMessage() : "server internal error");
+		return result.toJson();
+	}
 }

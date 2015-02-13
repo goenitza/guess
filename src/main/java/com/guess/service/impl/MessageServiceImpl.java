@@ -1,28 +1,28 @@
 package com.guess.service.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.guess.dao.MessageDao;
+import com.guess.enums.CircleUserType;
 import com.guess.enums.MessageType;
+import com.guess.model.CircleUser;
 import com.guess.model.Message;
-import com.guess.model.User;
+import com.guess.service.CircleUserService;
 import com.guess.service.MessageService;
 import com.guess.service.UserService;
-import com.guess.vo.FriendDB;
 
 @Component
 public class MessageServiceImpl extends BaseServiceImpl<Message, String> implements MessageService{
 	private MessageDao messageDao;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private CircleUserService circleUserService;
 
 	public MessageDao getMessageDao() {
 		return messageDao;
@@ -32,58 +32,47 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 		super.setBaseDao(messageDao);
 		this.messageDao = messageDao;
 	}
-	public List<Message> getByUser(String username) {
-		return messageDao.getByUser(username);
+	
+	public List<Message> getAll(String receiverId){
+		return messageDao.getAll(receiverId);
 	}
+	
 	@Transactional
-	public void processFriendApplication(Message message, boolean isAgreed) {
+	public void processFriendApplication(Message message, boolean isAgreed, String circleId,
+			String nickname, String avatar) {
+		String receiverId = message.getReceiverId();
+		String senderId = message.getSenderId();
+		
 		if(isAgreed){
-			String senderName = message.getSender();
-			String receiverName = message.getReceiver();
-			
-			User sender = userService.get(senderName);
-			User receiver = userService.get(receiverName);
-			
-			FriendDB senderFriendDB = new FriendDB();
-			senderFriendDB.setUsername(sender.getUsername());
-			senderFriendDB.setNickname(sender.getNickname());
-			senderFriendDB.setAvatar(sender.getAvatar());
-			FriendDB receiverFriendDB = new FriendDB();
-			receiverFriendDB.setUsername(receiver.getUsername());
-			receiverFriendDB.setNickname(receiver.getNickname());
-			receiverFriendDB.setAvatar(receiver.getAvatar());
-			
-			List<FriendDB> senderFriendDBs;
-			if(StringUtils.isBlank(sender.getFriends())){
-				senderFriendDBs = new ArrayList<FriendDB>();
-			}else {
-				senderFriendDBs = JSON.parseArray(sender.getFriends(), FriendDB.class);
+			if(circleId == null){
+				circleId = circleUserService.getDefualtFriendCircleId(receiverId);
 			}
-			senderFriendDBs.add(receiverFriendDB);
-			sender.setFriends(JSON.toJSONString(senderFriendDBs));
-			List<FriendDB> receiverFriendDBs;
-			if(StringUtils.isBlank(receiver.getFriends())){
-				receiverFriendDBs = new ArrayList<FriendDB>();
-			}else {
-				receiverFriendDBs = JSON.parseArray(receiver.getFriends(), FriendDB.class);
-			}
-			receiverFriendDBs.add(senderFriendDB);
-			receiver.setFriends(JSON.toJSONString(receiverFriendDBs));
 			
-			userService.update(sender);
-			userService.update(receiver);
+			CircleUser circleUser = new CircleUser();
+			circleUser.setCircleId(circleId);
+			circleUser.setUserId(receiverId);
+			circleUser.set_userId(senderId);
+			circleUser.setType(CircleUserType.FRIEND);
+			circleUserService.save(circleUser);
+			
+			String senderDefaultCircleId = circleUserService.getDefualtFriendCircleId(senderId);
+			CircleUser _circleUser = new CircleUser();
+			_circleUser.setCircleId(senderDefaultCircleId);
+			_circleUser.setUserId(senderId);
+			_circleUser.set_userId(receiverId);
+			_circleUser.setType(CircleUserType.FRIEND);
+			circleUserService.save(_circleUser);
 			
 			Message replyMessage = new Message();
 			replyMessage.setType(MessageType.FRIEND_APPLICATION_REPLAY);
-			replyMessage.setReceiver(senderName);
-			replyMessage.setSender(receiverName);
+			replyMessage.setReceiverId(senderId);
+			replyMessage.setSenderId(receiverId);
 			replyMessage.setDate(new Date());
+			replyMessage.setSenderNickname(nickname);
+			replyMessage.setSenderAvatar(avatar);
 			messageDao.save(replyMessage);
 		}
 		message.setIsProcessed(true);
 		messageDao.update(message);
-	}
-	public List<Message> getByType(String username, MessageType messageType) {
-		return messageDao.getByType(username, messageType);
 	}
 }

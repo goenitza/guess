@@ -50,7 +50,7 @@ public class User extends BaseModel{
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
-	@Column(nullable = false)
+	@Column()
 	public String getAvatar() {
 		return avatar;
 	}

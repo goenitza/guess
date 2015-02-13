@@ -1,5 +1,7 @@
 package com.guess.service.impl;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.guess.dao.OrganizationDao;
 import com.guess.model.Organization;
 import com.guess.model.UserStatistics;
+import com.guess.service.ImageService;
 import com.guess.service.OrganizationService;
 import com.guess.service.UserStatisticsService;
 
@@ -15,6 +18,8 @@ public class OrganizationServiceImpl extends BaseServiceImpl<Organization, Strin
 	private OrganizationDao organizationDao;
 	@Autowired
 	private UserStatisticsService userStatisticsService;
+	@Autowired
+	private ImageService imageService;
 
 	public OrganizationDao getOrganizationDao() {
 		return organizationDao;
@@ -29,9 +34,12 @@ public class OrganizationServiceImpl extends BaseServiceImpl<Organization, Strin
 	}
 	
 	@Transactional
-	@Override
-	public String save(Organization organization){
+	public String save(Organization organization, String contextPath) throws IOException{
 		String id = organizationDao.save(organization);
+		
+		String avatarPath = imageService.setDefaultAvatar(contextPath, id);
+		organization.setAvatar(avatarPath);
+		organizationDao.update(organization);
 		
 		UserStatistics userStatistics = new UserStatistics();
 		userStatistics.setUserId(id);

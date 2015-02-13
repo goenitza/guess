@@ -1,5 +1,6 @@
 package com.guess.service.impl;
 
+import java.util.Date;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.guess.dao.CircleDao;
 import com.guess.dao.CircleUserDao;
 import com.guess.dao.IndividualDao;
+import com.guess.dao.MessageDao;
 import com.guess.dao.OrganizationDao;
 import com.guess.enums.CircleType;
 import com.guess.enums.CircleUserType;
+import com.guess.enums.MessageType;
 import com.guess.enums.UserRole;
 import com.guess.model.Circle;
 import com.guess.model.CircleUser;
+import com.guess.model.Message;
 import com.guess.model.User;
 import com.guess.service.CircleUserService;
 
@@ -28,6 +32,8 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 	private IndividualDao individualDao;
 	@Autowired
 	private OrganizationDao organizationDao;
+	@Autowired
+	private MessageDao messageDao;
 
 	public CircleUserDao getCircleUserDao() {
 		return circleUserDao;
@@ -54,8 +60,8 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 	}
 	
 	@Transactional
-	public void payAttention(String userId, String _userId, UserRole role) {
-		String defaultFollowingCircleId = getDefualtFollowerCircleId(userId);
+	public void payAttention(String userId, String _userId, UserRole role, String nickname) {
+		String defaultFollowingCircleId = getDefualtFollowingCircleId(userId, role);
 		String defaultFollowerCircleId = getDefualtFollowerCircleId(_userId);
 		
 		CircleUser circleUser = new CircleUser();
@@ -71,6 +77,14 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		_circleUser.set_userId(userId);
 		_circleUser.setType(CircleUserType.FOLLOWER);
 		circleUserDao.save(_circleUser);
+		
+		Message message = new Message();
+		message.setType(MessageType.ORG_ATTENTION);
+		message.setReceiverId(_userId);
+		message.setSenderId(userId);
+		message.setSenderNickname(nickname);
+		message.setDate(new Date());
+		messageDao.save(message);
 	}
 	
 	String getDefualtFollowingCircleId(String userId, UserRole role){
@@ -91,7 +105,7 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		throw new RuntimeException("Default following circle is not found");
 	}
 	
-	String getDefualtFriendCircleId(String userId){
+	public String getDefualtFriendCircleId(String userId){
 		User user = individualDao.get(userId);
 		
 		Set<Circle> circles = user.getCircles();
@@ -109,7 +123,7 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		
 		Set<Circle> circles = user.getCircles();
 		for(Circle circle : circles){
-			if(circle.getType() == CircleType.FRIEND_DEFAULT);{
+			if(circle.getType() == CircleType.FOLLOWER_DEFAULT);{
 				return circle.getId();
 			}
 		}

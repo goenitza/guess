@@ -1,6 +1,8 @@
 package com.guess.service.impl;
 
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.guess.dao.IndividualDao;
 import com.guess.model.Individual;
 import com.guess.model.UserStatistics;
+import com.guess.service.ImageService;
 import com.guess.service.IndividualService;
 import com.guess.service.UserStatisticsService;
 
@@ -16,6 +19,8 @@ public class IndividualServiceImpl extends BaseServiceImpl<Individual, String> i
 	private IndividualDao individualDao;
 	@Autowired
 	private UserStatisticsService userStatisticsService;
+	@Autowired
+	private ImageService imageService;
 
 	public IndividualDao getIndividualDao() {
 		return individualDao;
@@ -31,10 +36,16 @@ public class IndividualServiceImpl extends BaseServiceImpl<Individual, String> i
 	}
 	
 	@Transactional
-	@Override
-	public String save(Individual individual){
+	public String save(Individual individual, String contextPath) throws IOException{
+		//Individual
 		String id = individualDao.save(individual);
 		
+		//set default image
+		String avatarPath = imageService.setDefaultAvatar(contextPath, id);
+		individual.setAvatar(avatarPath);
+		individualDao.update(individual);
+		
+		//UserStatistics
 		UserStatistics userStatistics = new UserStatistics();
 		userStatistics.setUserId(id);
 		userStatisticsService.save(userStatistics);
