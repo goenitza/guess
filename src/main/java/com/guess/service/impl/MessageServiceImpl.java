@@ -14,13 +14,10 @@ import com.guess.model.CircleUser;
 import com.guess.model.Message;
 import com.guess.service.CircleUserService;
 import com.guess.service.MessageService;
-import com.guess.service.UserService;
 
 @Component
 public class MessageServiceImpl extends BaseServiceImpl<Message, String> implements MessageService{
 	private MessageDao messageDao;
-	@Autowired
-	private UserService userService;
 	@Autowired
 	private CircleUserService circleUserService;
 

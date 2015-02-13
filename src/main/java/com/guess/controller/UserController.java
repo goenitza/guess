@@ -40,7 +40,6 @@ import com.guess.service.ImageService;
 import com.guess.service.IndividualService;
 import com.guess.service.MessageService;
 import com.guess.service.OrganizationService;
-import com.guess.service.UserService;
 import com.guess.util.ImageUtil;
 import com.guess.vo.IndividualVO;
 import com.guess.vo.OrgVO;
@@ -53,8 +52,6 @@ public class UserController {
 
 	private static Logger logger = LogManager.getLogger(UserController.class);
 
-	@Autowired
-	private UserService userService;
 	@Autowired
 	private CategoryService categoryService;
 	@Autowired
