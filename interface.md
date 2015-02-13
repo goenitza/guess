@@ -61,14 +61,14 @@
 ## 用户
 ### 注册 登录 注销  
 **注册**  
+role为用户角色：individual——普通用户、org——企业用户  
 ```js
 /user/register?username=user@163.com&password=user&passwordConfirm=user&nickname=user&role=individual    
 ```
-role为用户角色：individual——普通用户、org——企业用户
 ```
-    {
-       "id": "8af529b94b81d035014b81d2271f0000"
-    }
+{
+   "id": "8af529b94b81d035014b81d2271f0000"
+}
 ```
 **登录**  
 ```js
