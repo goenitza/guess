@@ -103,22 +103,22 @@ Request:
 2. A关注G  
 3. G收到A关注的消息
 
-**查找用户** 
+**查找用户**  
 Request:  
 ```js
 /user/get?username=user2@163.com&role=individual
 ```
 Response:  
 ```js
-    {
-       "user":
-       {
-           "avatar": "resources\avatar\8af529b94b81d035014b81eab24c0003.gif",
-           "id": "8af529b94b81d035014b81eab24c0003",
-           "nickname": "user2",
-           "username": "user2@163.com"
-       }
-    }
+{
+   "user":
+   {
+       "avatar": "resources\avatar\8af529b94b81d035014b81eab24c0003.gif",
+       "id": "8af529b94b81d035014b81eab24c0003",
+       "nickname": "user2",
+       "username": "user2@163.com"
+   }
+}
 ```
 **申请添加好友（针对普通用户）**  
 Request:  
@@ -130,7 +130,7 @@ Request:
 ```js
 /user/delete_friend?id=8af529b94b81d035014b81eab24c0003
 ```
-**添加关注（针对组织）** 
+**添加关注（针对组织）**  
 Request:  
 ```js
 /user/pay_attention?id=8af529b94b81d035014b81f3c1c80007
@@ -217,22 +217,21 @@ Response:
     }
 ```
 **设置消息为已读**  
-*id:消息ID*
 Request:  
 ```js
 /user/message/set_processed?id=8af529b94b4e1d3f014b4e861b0a0005  
 ```
-
-**删除消息**
+Params:  
+* id:消息ID
+**删除消息**  
 Request:  
 ```js
 /user/message/delete?ids=8af529b94b4e1d3f014b4e861b0a0005  
 ```
 Params:  
-* ids：待删除的消息ID，多个ID之间用逗号分隔
+* ids：待删除的消息ID，多个ID之间用逗号分隔  
 **处理好友申请消息**  
-*id：消息ID*  
-*isAgreed：是否同意加对方为好友*
+加对方为好友*
 Request:  
 ```js
 /user/message/process_friend_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true&circleId=circlename  
