@@ -66,7 +66,7 @@ Request：
 /user/register?username=user@163.com&password=user&passwordConfirm=user&nickname=user&role=individual    
 ```
 Parameter：  
-    role为用户角色：individual——普通用户、org——企业用户  
+* role为用户角色：individual——普通用户、org——企业用户  
   
 Response:
 ```
