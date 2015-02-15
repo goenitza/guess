@@ -58,7 +58,6 @@ public class MessageController {
 	@ResponseBody
 	public String processFriendApplication(@RequestParam("id") String id, 
 			@RequestParam("isAgreed") boolean isAgreed, 
-			@RequestParam(value = "circleId", required = false) String circleId,
 			HttpServletRequest request,
 			HttpServletResponse response){
 		Result result = new Result();
@@ -79,30 +78,30 @@ public class MessageController {
 		
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
 		
-		messageService.processFriendApplication(message, isAgreed, circleId, 
-				userInSession.nickname, userInSession.avatar);
+		messageService.processFriendApplication(message, isAgreed,  
+				userInSession.nickname, userInSession.getAvatar());
 		logger.info("process friend application message: " + message.getReceiverId());
 		
 		return result.toJson();
 	}
 	
-//	@RequestMapping("/set_processed")
-//	@ResponseBody
-//	public String setProcessed(@RequestParam("id") String id,
-//			HttpServletResponse response){
-//		Result result = new Result();
-//		Message message = messageService.get(id);
-//		if(message == null){
-//			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-//			result.setError("找不到具有此id的message");
-//			logger.info("the message does not exist: " + id);
-//		}else {
-//			message.setIsProcessed(true);
-//			messageService.update(message);
-//			logger.info("set processed: " + id);
-//		}
-//		return result.toJson();
-//	}
+	@RequestMapping("/set_processed")
+	@ResponseBody
+	public String setProcessed(@RequestParam("id") String id,
+			HttpServletResponse response){
+		Result result = new Result();
+		Message message = messageService.get(id);
+		if(message == null){
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			result.setError("找不到具有此id的message");
+			logger.info("the message does not exist: " + id);
+		}else {
+			message.setIsProcessed(true);
+			messageService.update(message);
+			logger.info("set processed: " + id);
+		}
+		return result.toJson();
+	}
 	
 	@RequestMapping("/delete")
 	@ResponseBody

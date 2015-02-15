@@ -1,7 +1,7 @@
 package com.guess.service.impl;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,11 +12,9 @@ import com.guess.dao.CircleUserDao;
 import com.guess.dao.IndividualDao;
 import com.guess.dao.MessageDao;
 import com.guess.dao.OrganizationDao;
-import com.guess.enums.CircleType;
 import com.guess.enums.CircleUserType;
 import com.guess.enums.MessageType;
 import com.guess.enums.UserRole;
-import com.guess.model.Circle;
 import com.guess.model.CircleUser;
 import com.guess.model.Message;
 import com.guess.model.User;
@@ -61,18 +59,14 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 	
 	@Transactional
 	public void payAttention(String userId, String _userId, UserRole role, String nickname) {
-		String defaultFollowingCircleId = getDefualtFollowingCircleId(userId, role);
-		String defaultFollowerCircleId = getDefualtFollowerCircleId(_userId);
 		
 		CircleUser circleUser = new CircleUser();
-		circleUser.setCircleId(defaultFollowingCircleId);
 		circleUser.setUserId(userId);
 		circleUser.set_userId(_userId);
 		circleUser.setType(CircleUserType.FOLLOWING);
 		circleUserDao.save(circleUser);
 		
 		CircleUser _circleUser = new CircleUser();
-		_circleUser.setCircleId(defaultFollowerCircleId);
 		_circleUser.setUserId(_userId);
 		_circleUser.set_userId(userId);
 		_circleUser.setType(CircleUserType.FOLLOWER);
@@ -87,46 +81,12 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		messageDao.save(message);
 	}
 	
-	String getDefualtFollowingCircleId(String userId, UserRole role){
-		User user = null;
-		if(role == UserRole.INDIVIDUAL){
-			user = individualDao.get(userId);
-		}else if(role == UserRole.ORG){
-			user = organizationDao.get(userId);
-		}else {
-			throw new RuntimeException("the type of user is incorrect: "  + role);
-		}
-		Set<Circle> circles = user.getCircles();
-		for(Circle circle : circles){
-			if(circle.getType() == CircleType.FOLLOWING_DEFAULT);{
-				return circle.getId();
-			}
-		}
-		throw new RuntimeException("Default following circle is not found");
-	}
-	
-	public String getDefualtFriendCircleId(String userId){
-		User user = individualDao.get(userId);
+	@Transactional
+	public List<User> getAll(String userId) {
+		List<CircleUser> circleUsers = circleUserDao.getAll(userId);
 		
-		Set<Circle> circles = user.getCircles();
-		for(Circle circle : circles){
-			if(circle.getType() == CircleType.FRIEND_DEFAULT);{
-				return circle.getId();
-			}
-		}
 		
-		throw new RuntimeException("Default friend circle is not found");
-	}
-	
-	String getDefualtFollowerCircleId(String userId){
-		User user = organizationDao.get(userId);
 		
-		Set<Circle> circles = user.getCircles();
-		for(Circle circle : circles){
-			if(circle.getType() == CircleType.FOLLOWER_DEFAULT);{
-				return circle.getId();
-			}
-		}
-		throw new RuntimeException("Default follower circle is not found");
+		return null;
 	}
 }

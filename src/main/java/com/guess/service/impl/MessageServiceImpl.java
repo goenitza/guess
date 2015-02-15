@@ -35,26 +35,20 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 	}
 	
 	@Transactional
-	public void processFriendApplication(Message message, boolean isAgreed, String circleId,
+	public void processFriendApplication(Message message, boolean isAgreed,
 			String nickname, String avatar) {
 		String receiverId = message.getReceiverId();
 		String senderId = message.getSenderId();
 		
 		if(isAgreed){
-			if(circleId == null){
-				circleId = circleUserService.getDefualtFriendCircleId(receiverId);
-			}
 			
 			CircleUser circleUser = new CircleUser();
-			circleUser.setCircleId(circleId);
 			circleUser.setUserId(receiverId);
 			circleUser.set_userId(senderId);
 			circleUser.setType(CircleUserType.FRIEND);
 			circleUserService.save(circleUser);
 			
-			String senderDefaultCircleId = circleUserService.getDefualtFriendCircleId(senderId);
 			CircleUser _circleUser = new CircleUser();
-			_circleUser.setCircleId(senderDefaultCircleId);
 			_circleUser.setUserId(senderId);
 			_circleUser.set_userId(receiverId);
 			_circleUser.setType(CircleUserType.FRIEND);
@@ -71,5 +65,12 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 		}
 		message.setIsProcessed(true);
 		messageDao.update(message);
+	}
+	
+	@Transactional
+	public void processFriendApplicationReply(Message message, String id,
+			String circleId) {
+		
+		
 	}
 }

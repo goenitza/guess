@@ -234,12 +234,53 @@ Params:
 **处理好友申请消息**  
 Request:  
 ```js
-/user/message/process_friend_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true&circleId=circlename  
+/user/message/process_friend_application?id=8af529b94b4e1d3f014b4e6085950004&isAgreed=true  
 ```
 Params:  
 * id:消息ID
 * isAgreed:是否同意添加好友请求
-* circleId:朋友圈ID，同意好友请求后会将此好友添加到这个朋友圈中，若无此参数，则添加到缺省的朋友圈中。
 
+### 朋友圈
+**添加**  
+Request:  
+```js
+/user/circle/add?name=IT
+```  
+Response:  
+```js
+{
+    "id": "402881e64b8d16d4014b8d1a35d10003"
+}
+```  
+**修改**  
+Request:  
+```js
+/user/circle/update?id=402881e64b8d16d4014b8d1a35d10003&name=同学
+```
+**删除**  
+Request:  
+```js
+/user/circle/delete?id=402881e64b8d16d4014b8d1a35d10003
+```
+**获取某用户所有**  
+Request:  
+```js
+/user/circle/get_all
+```  
+Response:  
+```js
+{
+    "circles": [
+        {
+            "id": "402881e64b8d16d4014b8d1a35d10003",
+            "name": "IT"
+        },
+        {
+            "id": "402881e64b8d16d4014b8d178b680002",
+            "name": "我的好友"
+        }
+    ]
+}
+```
 
 

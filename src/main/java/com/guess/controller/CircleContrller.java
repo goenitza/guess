@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.guess.enums.CircleType;
 import com.guess.enums.UserRole;
 import com.guess.model.Circle;
 import com.guess.model.Individual;
 import com.guess.model.Organization;
+import com.guess.model.User;
 import com.guess.service.IndividualService;
 import com.guess.service.OrganizationService;
 import com.guess.vo.Result;
@@ -39,32 +39,13 @@ public class CircleContrller {
 	public String getAll(HttpServletRequest request){
 		Result result = new Result();
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		Set<Circle> circles = null;
+		User user = null;
 		if(userInSession.role == UserRole.INDIVIDUAL){
-			Individual individual = individualService.get(userInSession.id);
-			circles = individual.getCircles();
-			Iterator<Circle> iterator = circles.iterator();
-			Circle circle = null;
-			while(iterator.hasNext()){
-				circle = iterator.next();
-				if(circle.getType() == CircleType.FOLLOWING_DEFAULT){
-					iterator.remove();
-					break;
-				}
-			}
+			user = individualService.get(userInSession.id);
 		}else {
-			Organization organization = organizationService.get(userInSession.id);
-			circles = organization.getCircles();
-			Iterator<Circle> iterator = circles.iterator();
-			Circle circle = null;
-			while(iterator.hasNext()){
-				circle = iterator.next();
-				if(circle.getType() == CircleType.FOLLOWING_DEFAULT){
-					iterator.remove();
-					break;
-				}
-			}
+			user = organizationService.get(userInSession.id);
 		}
+		Set<Circle> circles = user.getCircles();
 		result.set("circles", JSON.toJSON(circles));
 		logger.info("get all circle: " + userInSession.id);
 		return result.toJson();
@@ -76,23 +57,34 @@ public class CircleContrller {
 		Result result = new Result();
 		Circle circle = new Circle();
 		circle.setName(name);
-		
+		String id = null;
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
 		if(userInSession.role == UserRole.INDIVIDUAL){
-			circle.setType(CircleType.FRIEND);
 			Individual individual = individualService.get(userInSession.id);
 			Set<Circle> circles = individual.getCircles();
 			circles.add(circle);
 			individual.setCircles(circles);
 			individualService.update(individual);
+			for(Circle c : circles){
+				if(c.equals(circle)){
+					id = c.getId();
+					break;
+				}
+			}
 		}else {
-			circle.setType(CircleType.FOLLOWER);
 			Organization organization = organizationService.get(userInSession.id);
 			Set<Circle> circles = organization.getCircles();
 			circles.add(circle);
 			organization.setCircles(circles);
 			organizationService.update(organization);
+			for(Circle c : circles){
+				if(c.equals(circle)){
+					id = c.getId();
+					break;
+				}
+			}
 		}
+		result.set("id", id);
 		logger.info("add new circle: " + name);
 		return result.toJson();
 	}

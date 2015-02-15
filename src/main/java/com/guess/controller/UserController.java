@@ -2,9 +2,7 @@ package com.guess.controller;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,12 +22,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
-import com.guess.constant.Constant;
-import com.guess.enums.CircleType;
 import com.guess.enums.MessageType;
 import com.guess.enums.UserRole;
 import com.guess.model.Category;
-import com.guess.model.Circle;
 import com.guess.model.Individual;
 import com.guess.model.Message;
 import com.guess.model.Organization;
@@ -117,20 +112,6 @@ public class UserController {
 				in.setPassword(DigestUtils.md5Hex(password));
 				in.setRole(userRole);
 				in.setNickname(nickname);
-				//in.setAvatar(Constant.DEFAULT_AVATAR);
-				
-				Circle defaultFriendCircle = new Circle();
-				defaultFriendCircle.setType(CircleType.FRIEND_DEFAULT);
-				defaultFriendCircle.setName(Constant.DEFAULT_FRIEND_CIRCLE_NAME);
-				
-				Circle defaultFollowingCircle = new Circle();
-				defaultFollowingCircle.setType(CircleType.FOLLOWING_DEFAULT);
-				defaultFollowingCircle.setName(Constant.DEFAULT_FOLLOWING_CIRCLE_NAME);
-				
-				Set<Circle> circles = new HashSet<Circle>();
-				circles.add(defaultFriendCircle);
-				circles.add(defaultFollowingCircle);
-				in.setCircles(circles);
 				
 				String contextPath = request.getSession().getServletContext().getRealPath("/");
 				
@@ -141,7 +122,6 @@ public class UserController {
 				userInSession.username = username;
 				userInSession.role = UserRole.INDIVIDUAL;
 				userInSession.nickname = nickname;
-				userInSession.avatar = Constant.DEFAULT_AVATAR;
 				
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
@@ -162,21 +142,6 @@ public class UserController {
 				org.setRole(userRole);
 				org.setNickname(nickname);
 				
-				//org.setAvatar(Constant.DEFAULT_AVATAR);
-				
-				Circle defaultFriendCircle = new Circle();
-				defaultFriendCircle.setType(CircleType.FOLLOWER_DEFAULT);
-				defaultFriendCircle.setName(Constant.DEFAULT_FOLLOWER_CIRCLE_NAME);
-				
-				Circle defaultFollowingCircle = new Circle();
-				defaultFollowingCircle.setType(CircleType.FOLLOWING_DEFAULT);
-				defaultFollowingCircle.setName(Constant.DEFAULT_FOLLOWING_CIRCLE_NAME);
-				
-				Set<Circle> circles = new HashSet<Circle>();
-				circles.add(defaultFriendCircle);
-				circles.add(defaultFollowingCircle);
-				org.setCircles(circles);
-				
 				String contextPath = request.getSession().getServletContext().getRealPath("/");
 				
 				String id = organizationService.save(org, contextPath);
@@ -186,7 +151,6 @@ public class UserController {
 				userInSession.username = username;
 				userInSession.role = UserRole.ORG;
 				userInSession.nickname = nickname;
-				userInSession.avatar = Constant.DEFAULT_AVATAR;
 				
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
@@ -248,7 +212,6 @@ public class UserController {
 			userInSession.role = userRole;
 			userInSession.username = username;
 			userInSession.nickname = user.getNickname();
-			userInSession.avatar = user.getAvatar();
 			
 			request.getSession().setAttribute("user", userInSession);
 			 result.set("id", user.getId());
@@ -404,7 +367,6 @@ public class UserController {
 		message.setReceiverId(id);
 		message.setSenderId(userInSession.id);
 		message.setSenderNickname(userInSession.nickname);
-		message.setSenderAvatar(userInSession.avatar);
 		message.setDate(new Date());
 		messageService.save(message);
 		logger.info("apply friend: " + userInSession.id + " -> " + id);
@@ -488,6 +450,34 @@ public class UserController {
 			logger.info("upload avatar: " + userInSession.id);
 		}
 
+		return result.toJson();
+	}
+	
+	@RequestMapping(value = {"get_all_friend", "get_all_follower"})
+	@ResponseBody
+	public String getAllFriendOrFollower(HttpServletRequest request){
+		Result result = new Result();
+		//to do 
+		
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		List<User> users = circleUserService.getAll(userInSession.id);
+		result.set("users", JSON.toJSON(users));
+		return result.toJson();
+	}
+	
+	@RequestMapping("get_all_following")
+	@ResponseBody
+	public String getAllFollowing(){
+		Result result = new Result();
+		
+		return result.toJson();
+	}
+	
+	@RequestMapping(value = {"get_friend_by_circle", "get_follower_by_circle"})
+	@ResponseBody
+	public String getFriendOrFollowerByCircle(){
+		Result result = new Result();
+		
 		return result.toJson();
 	}
 }

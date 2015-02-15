@@ -71,7 +71,7 @@ public class User extends BaseModel{
 	public void setInterestedCategories(String interestedCategories) {
 		this.interestedCategories = interestedCategories;
 	}
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	public Set<Circle> getCircles() {
 		return circles;
 	}
