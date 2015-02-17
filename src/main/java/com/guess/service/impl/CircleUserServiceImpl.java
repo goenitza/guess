@@ -1,5 +1,6 @@
 package com.guess.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,9 +17,12 @@ import com.guess.enums.CircleUserType;
 import com.guess.enums.MessageType;
 import com.guess.enums.UserRole;
 import com.guess.model.CircleUser;
+import com.guess.model.Individual;
 import com.guess.model.Message;
-import com.guess.model.User;
+import com.guess.model.Organization;
 import com.guess.service.CircleUserService;
+import com.guess.vo.IndividualVO;
+import com.guess.vo.OrgVO;
 
 @Component
 public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> implements CircleUserService{
@@ -44,6 +48,10 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 	
 	public boolean exists(String userId, String _userId) {
 		return circleUserDao.exist(userId, _userId);
+	}
+	
+	public boolean exists(String userId, String _userId, String circleId) {
+		return circleUserDao.exist(userId, _userId, circleId);
 	}
 	
 	@Transactional
@@ -82,11 +90,75 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 	}
 	
 	@Transactional
-	public List<User> getAll(String userId) {
-		List<CircleUser> circleUsers = circleUserDao.getAll(userId);
+	public List<IndividualVO> getAllFriend(String userId) {
+		List<String> ids = circleUserDao.getAllFriendIds(userId);
+		List<IndividualVO> individualVOs = new ArrayList<IndividualVO>();
+		for(String id : ids){
+			Individual individual = individualDao.get(id);
+			IndividualVO individualVO = new IndividualVO();
+			individualVO.setId(individual.getId());
+			individualVO.setNickname(individual.getNickname());
+			individualVO.setUsername(individual.getUsername());
+			individualVO.setAvatar(individual.getAvatar());
+			individualVOs.add(individualVO);
+		}
+		return individualVOs;
+	}
+	
+	@Transactional
+	public List<IndividualVO> getAllFollower(String userId) {
+		List<String> ids = circleUserDao.getAllFollowerIds(userId);
+		List<IndividualVO> individualVOs = new ArrayList<IndividualVO>();
+		for(String id : ids){
+			Individual individual = individualDao.get(id);
+			IndividualVO individualVO = new IndividualVO();
+			individualVO.setId(individual.getId());
+			individualVO.setNickname(individual.getNickname());
+			individualVO.setUsername(individual.getUsername());
+			individualVO.setAvatar(individual.getAvatar());
+			individualVOs.add(individualVO);
+		}
+		return individualVOs;
+	}
+	
+	@Transactional
+	public List<OrgVO> getAllFollowing(String userId) {
+		List<String> ids = circleUserDao.getAllFollowingIds(userId);
+		List<OrgVO> orgVOs = new ArrayList<OrgVO>();
+		for(String id : ids){
+			Organization organization = organizationDao.get(id);
+			OrgVO orgVO = new OrgVO();
+			orgVO.setId(organization.getId());
+			orgVO.setNickname(organization.getNickname());
+			orgVO.setUsername(organization.getUsername());
+			orgVO.setAvatar(organization.getAvatar());
+			orgVO.setIsVerified(organization.getIsVerified());
+			orgVOs.add(orgVO);
+		}
+		return orgVOs;
+	}
+	
+	public List<IndividualVO> getFriendOrFollowerByCircle(String userId,
+			String circleId) {
+		List<String> ids = circleUserDao.getFriendOrFollowerByCircle(userId, circleId);
+		List<IndividualVO> individualVOs = new ArrayList<IndividualVO>();
+		for(String id : ids){
+			Individual individual = individualDao.get(id);
+			IndividualVO individualVO = new IndividualVO();
+			individualVO.setId(individual.getId());
+			individualVO.setNickname(individual.getNickname());
+			individualVO.setUsername(individual.getUsername());
+			individualVO.setAvatar(individual.getAvatar());
+			individualVOs.add(individualVO);
+		}
+		return individualVOs;
+	}
+	
+	public void deleteFromCircle(String id, String userId, String circleId) {
+		CircleUser circleUser = circleUserDao.get(id, userId, circleId);
+		if(circleUser != null){
+			circleUserDao.delete(circleUser);
+		}
 		
-		
-		
-		return null;
 	}
 }

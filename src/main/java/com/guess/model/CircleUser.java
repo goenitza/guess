@@ -2,6 +2,8 @@ package com.guess.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import com.guess.enums.CircleUserType;
 
@@ -33,6 +35,7 @@ public class CircleUser extends BaseModel{
 	public void set_userId(String _userId) {
 		this._userId = _userId;
 	}
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	public CircleUserType getType() {
 		return type;

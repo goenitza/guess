@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
+import com.guess.enums.CircleUserType;
 import com.guess.enums.MessageType;
 import com.guess.enums.UserRole;
 import com.guess.model.Category;
+import com.guess.model.CircleUser;
 import com.guess.model.Individual;
 import com.guess.model.Message;
 import com.guess.model.Organization;
@@ -138,7 +140,7 @@ public class UserController {
 			}else {
 				Organization org = new Organization();
 				org.setUsername(username);
-				org.setPassword(password);
+				org.setPassword(DigestUtils.md5Hex(password));
 				org.setRole(userRole);
 				org.setNickname(nickname);
 				
@@ -453,30 +455,95 @@ public class UserController {
 		return result.toJson();
 	}
 	
-	@RequestMapping(value = {"get_all_friend", "get_all_follower"})
+	@RequestMapping("get_all_friend")
 	@ResponseBody
-	public String getAllFriendOrFollower(HttpServletRequest request){
+	public String getAllFriend(HttpServletRequest request){
 		Result result = new Result();
 		//to do 
 		
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		List<User> users = circleUserService.getAll(userInSession.id);
+		List<IndividualVO> users = circleUserService.getAllFriend(userInSession.id);
+		result.set("users", JSON.toJSON(users));
+		logger.info("get all friend: " + userInSession.id);
+		return result.toJson();
+	}
+	
+	@RequestMapping("get_all_follower")
+	@ResponseBody
+	public String getAllFollower(HttpServletRequest request){
+		Result result = new Result();
+		//to do 
+		
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		List<IndividualVO> users = circleUserService.getAllFollower(userInSession.id);
 		result.set("users", JSON.toJSON(users));
 		return result.toJson();
 	}
 	
 	@RequestMapping("get_all_following")
 	@ResponseBody
-	public String getAllFollowing(){
+	public String getAllFollowing(HttpServletRequest request){
 		Result result = new Result();
+		//to do 
+		
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		List<OrgVO> users = circleUserService.getAllFollowing(userInSession.id);
+		result.set("users", JSON.toJSON(users));
 		
 		return result.toJson();
 	}
 	
-	@RequestMapping(value = {"get_friend_by_circle", "get_follower_by_circle"})
+	@RequestMapping("get_by_circle")
 	@ResponseBody
-	public String getFriendOrFollowerByCircle(){
+	public String getFriendOrFollowerByCircle(@RequestParam("circleId") String circleId, 
+			HttpServletRequest request){
+		Result result = new Result();		
+		//to do 
+		
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		List<IndividualVO> users = circleUserService.getFriendOrFollowerByCircle(userInSession.id, circleId);
+		result.set("users", JSON.toJSON(users));
+		
+		return result.toJson();
+	}
+	
+	@RequestMapping("add_to_circle")
+	@ResponseBody
+	public String addToCircle(@RequestParam("userId") String userId, @RequestParam("circleId") String circleId,
+			HttpServletRequest request, HttpServletResponse response){
 		Result result = new Result();
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		
+		if(circleUserService.exists(userInSession.id, userId, circleId)){
+			response.setStatus(HttpServletResponse.SC_CONFLICT);
+			result.setError("不允许重复添加好友到同一分组中");
+			logger.info("do not allow to add the user to the same circle ");
+			return result.toJson();
+		}
+		
+		CircleUser circleUser = new CircleUser();
+		circleUser.setUserId(userInSession.id);
+		circleUser.set_userId(userId);
+		circleUser.setCircleId(circleId);
+		if(userInSession.role == UserRole.INDIVIDUAL){
+			circleUser.setType(CircleUserType.FRIEND);
+		}else {
+			circleUser.setType(CircleUserType.FOLLOWER);
+		}
+		
+		circleUserService.save(circleUser);
+		
+		return result.toJson();
+	}
+	
+	@RequestMapping("delete_from_circle")
+	@ResponseBody
+	public String deleteFromCircle(@RequestParam("userId") String userId, @RequestParam("circleId") String circleId,
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		
+		circleUserService.deleteFromCircle(userInSession.id, userId, circleId);
 		
 		return result.toJson();
 	}

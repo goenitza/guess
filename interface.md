@@ -124,22 +124,175 @@ Response:
 Request:  
 ```js
 /user/apply_friend?id=8af529b94b81d035014b81eab24c0003
-```
+```  
 **删除好友**  
 Request:  
 ```js
 /user/delete_friend?id=8af529b94b81d035014b81eab24c0003
-```
+```  
 **添加关注（针对组织）**  
 Request:  
 ```js
 /user/pay_attention?id=8af529b94b81d035014b81f3c1c80007
-```
+```  
 **删除关注（针对组织）**  
 Request:  
 ```js
 /user/delete_attention?id=8af529b94b81d035014b81f3c1c80007
-```
+```  
+**获得所有好友**  
+Request:  
+```js
+/user/get_all_friend
+```  
+Response:  
+```js
+{
+    "users": [
+        {
+            "avatar": "resources\\avatar\\402881e64b97e52f014b97e6468d0002.gif",
+            "id": "402881e64b97e52f014b97e6468d0002",
+            "nickname": "路在脚下2",
+            "username": "user2@163.com"
+        },
+        {
+            "avatar": "resources\\avatar\\402881e64b97e52f014b97e60b800001.gif",
+            "id": "402881e64b97e52f014b97e60b800001",
+            "nickname": "路在脚下3",
+            "username": "user3@163.com"
+        },
+        {
+            "avatar": "resources\\avatar\\402881e64b97e52f014b97e5c3340000.gif",
+            "id": "402881e64b97e52f014b97e5c3340000",
+            "nickname": "路在脚下4",
+            "username": "user4@163.com"
+        }
+    ]
+}
+```  
+**获得所有关注的组织**  
+Request:  
+```js
+/user/get_all_following
+```  
+Response:  
+```js
+{
+    "users": [
+        {
+            "avatar": "resources\\avatar\\402881e64b97f78b014b97fc305a0000.gif",
+            "id": "402881e64b97f78b014b97fc305a0000",
+            "isVerified": false,
+            "nickname": "组织1",
+            "username": "org1@163.com"
+        },
+        {
+            "avatar": "resources\\avatar\\402881e64b97f78b014b97fc6f220001.gif",
+            "id": "402881e64b97f78b014b97fc6f220001",
+            "isVerified": false,
+            "nickname": "组织2",
+            "username": "org2@163.com"
+        }
+    ]
+}
+```  
+**获得所有粉丝**  
+Request:  
+```js
+/user/get_all_follower
+```  
+Response:  
+```js
+{
+    "users": [
+        {
+            "avatar": "resources\\avatar\\402881e64b97e52f014b97e6834a0003.gif",
+            "id": "402881e64b97e52f014b97e6834a0003",
+            "nickname": "路在脚下1",
+            "username": "user1@163.com"
+        }
+    ]
+}
+``` 
+### 朋友圈
+**添加**  
+Request:  
+```js
+/user/circle/add?name=IT
+```  
+Response:  
+```js
+{
+    "id": "402881e64b8d16d4014b8d1a35d10003"
+}
+```  
+**修改**  
+Request:  
+```js
+/user/circle/update?id=402881e64b8d16d4014b8d1a35d10003&name=同学
+```  
+**删除**  
+Request:  
+```js
+/user/circle/delete?id=402881e64b8d16d4014b8d1a35d10003
+```  
+**获取某用户所有**  
+Request:  
+```js
+/user/circle/get_all
+```  
+Response:  
+```js
+{
+    "circles": [
+        {
+            "id": "402881e64b8d16d4014b8d1a35d10003",
+            "name": "IT"
+        },
+        {
+            "id": "402881e64b8d16d4014b8d178b680002",
+            "name": "我的好友"
+        }
+    ]
+}
+```  
+**添加好友或粉丝到某一朋友圈**  
+Request:  
+```js
+/user/add_to_circle?userId=402881e64b97e52f014b97e60b800001&circleId=402881e64b981221014b981262a70000
+```  
+Param:  
+* userId：好友或粉丝的ID  
+* circleId：朋友圈ID    
+**将好友或粉丝从某一朋友圈删除**  
+Request:  
+```js
+/user/delete_from_circle?circleId=402881e64b981221014b981262a70000&userId=402881e64b97e52f014b97e6468d0002
+```  
+**获得某一朋友圈的好友**  
+Request:  
+```js
+/user/get_by_circle?circleId=402881e64b981221014b981262a70000
+```  
+Response:  
+```js
+{
+    "users": [
+        {
+            "avatar": "resources\\avatar\\402881e64b97e52f014b97e6468d0002.gif",
+            "id": "402881e64b97e52f014b97e6468d0002",
+            "nickname": "路在脚下2",
+            "username": "user2@163.com"
+        },
+        {
+            "avatar": "resources\\avatar\\402881e64b97e52f014b97e60b800001.gif",
+            "id": "402881e64b97e52f014b97e60b800001",
+            "nickname": "路在脚下3",
+            "username": "user3@163.com"
+        }
+    ]
+}
+```  
 ### 消息处理
 
 消息类型：
@@ -240,47 +393,6 @@ Params:
 * id:消息ID
 * isAgreed:是否同意添加好友请求
 
-### 朋友圈
-**添加**  
-Request:  
-```js
-/user/circle/add?name=IT
-```  
-Response:  
-```js
-{
-    "id": "402881e64b8d16d4014b8d1a35d10003"
-}
-```  
-**修改**  
-Request:  
-```js
-/user/circle/update?id=402881e64b8d16d4014b8d1a35d10003&name=同学
-```
-**删除**  
-Request:  
-```js
-/user/circle/delete?id=402881e64b8d16d4014b8d1a35d10003
-```
-**获取某用户所有**  
-Request:  
-```js
-/user/circle/get_all
-```  
-Response:  
-```js
-{
-    "circles": [
-        {
-            "id": "402881e64b8d16d4014b8d1a35d10003",
-            "name": "IT"
-        },
-        {
-            "id": "402881e64b8d16d4014b8d178b680002",
-            "name": "我的好友"
-        }
-    ]
-}
-```
+
 
 
