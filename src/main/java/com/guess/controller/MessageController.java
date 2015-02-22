@@ -79,7 +79,7 @@ public class MessageController {
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
 		
 		messageService.processFriendApplication(message, isAgreed,  
-				userInSession.nickname, userInSession.getAvatar());
+				userInSession.nickname, userInSession.avatar);
 		logger.info("process friend application message: " + message.getReceiverId());
 		
 		return result.toJson();

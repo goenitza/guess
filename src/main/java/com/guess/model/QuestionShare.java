@@ -1,15 +1,42 @@
 package com.guess.model;
 
+import java.util.Date;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
-//who does the question been shared to
 @Entity
-public class QuestionShare extends BaseModelAssignedId{
-	private String friends;//json
-	public String getFriends() {
-		return friends;
+public class QuestionShare extends BaseModel{
+	private String questionId;
+	private String userId;
+	private String _userId;
+	private Date date;
+	@Column(nullable = false)
+	public String getQuestionId() {
+		return questionId;
 	}
-	public void setFriends(String friends) {
-		this.friends = friends;
+	public void setQuestionId(String questionId) {
+		this.questionId = questionId;
+	}
+	@Column(nullable = false)
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	@Column(nullable = false)
+	public String get_userId() {
+		return _userId;
+	}
+	public void set_userId(String _userId) {
+		this._userId = _userId;
+	}
+	@Column(nullable = false)
+	public Date getDate() {
+		return date;
+	}
+	public void setDate(Date date) {
+		this.date = date;
 	}
 }

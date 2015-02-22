@@ -72,11 +72,6 @@ public class QuestionController {
 	        "name": "汽车"
 	    }
 	]
-	friends:
-	[
-		"friend1Id",
-		"friend2Id"
-	]
 	 * 
 	 */
 	@RequestMapping("/add")
@@ -90,9 +85,9 @@ public class QuestionController {
 			@RequestParam(value = "optionsImages", required = false) MultipartFile[] optionsImages, 
 			@RequestParam(value = "answer", required = false) String answer, 
 			@RequestParam(value = "categories", required = false) String categories, 
-			@RequestParam("isPublic") boolean isPublic, 
 			@RequestParam("isPublished") boolean isPublished, 
-			@RequestParam(value = "friends", required = false) String friends, 
+			@RequestParam(value = "isPublic", required = false) boolean isPublic, 
+			@RequestParam(value = "userIds", required = false) List<String> userIds, 
 			HttpServletRequest request, HttpServletResponse response
 			) throws IOException{
 		Result result = new Result();
@@ -112,9 +107,9 @@ public class QuestionController {
 				logger.info("image format is not supported or size > 1M");
 				return result.toJson();
 			}
-			String fileName = userInSession.username + "_content"; 
-			String contentUrl = imageService.saveQuestionContentImage(contextPath, contentImage, fileName);
-			question.setContentUrl(contentUrl);
+//			String fileName = question.getId() + "_content"; 
+//			String contentUrl = imageService.saveQuestionContentImage(contextPath, contentImage, fileName);
+//			question.setContentUrl(contentUrl);
 		}
 		if(StringUtils.isNotBlank(linkName)){
 			question.setLinkName(linkName);
@@ -134,12 +129,12 @@ public class QuestionController {
 						logger.info("image format is not supported or size > 1M");
 						return result.toJson();
 					}
-					String fileName = userInSession.username + "_option_" + (i + 1);
-					String imageUrl = imageService.saveQuestionOptionImage(contextPath, optionsImages[i], fileName);
-					option.setImageUrl(imageUrl);
+//					String fileName = question.getId() + "_option_" + (i + 1);
+//					String imageUrl = imageService.saveQuestionOptionImage(contextPath, optionsImages[i], fileName);
+//					option.setImageUrl(imageUrl);
 				}
 			}
-			question.setOptions(JSON.toJSONString(questionOptions));
+//			question.setOptions(JSON.toJSONString(questionOptions));
 		}
 		if(StringUtils.isNotBlank(answer)){
 			question.setAnswer(answer);
@@ -149,24 +144,39 @@ public class QuestionController {
 		}
 		question.setIsPublic(isPublic);
 		question.setIsPublished(isPublished);
-		question.setUsername(userInSession.username);
+		question.setUserId(userInSession.id);
 		question.setDate(new Date());
 		
-		String id = questionService.save(question, friends);
+		String id = questionService.save( userInSession.nickname, userInSession.avatar, 
+				question, contentImage, options, optionsImages, contextPath, userIds);
 		result.set("id", id);
 		logger.info("add question: " + id);
 		return result.toJson();
 	}
 	
-	//friends-json
+	@RequestMapping("/publish")
+	@ResponseBody
+	public String publish(@RequestParam("questionId") String questionId, 
+			@RequestParam("isPublic") boolean isPublic, 
+			@RequestParam(value = "userIds", required = false) List<String> userIds, 
+			HttpServletRequest request, HttpServletResponse response){
+		Result result = new Result();
+		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
+		questionService.publish( userInSession.nickname, userInSession.avatar, 
+				questionId, isPublic, userIds);
+		logger.info("publish question: " + questionId);
+		return result.toJson();
+	}
+	
 	@RequestMapping("/share")
 	@ResponseBody
-	public String share(@RequestParam("id") String id, @RequestParam("friends") String friends, 
+	public String share(@RequestParam("questionId") String questionId, @RequestParam("userIds") List<String> userIds, 
 			HttpServletRequest request){
 		Result result = new Result();
 		UserInSession userInSession = (UserInSession) request.getSession().getAttribute("user");
-		questionService.share(userInSession.username, id, friends);
-		logger.info("share question: " + id);
+		questionService.share(userInSession.id, userInSession.nickname, userInSession.avatar,
+				questionId, userIds);
+		logger.info("share question: " + questionId);
 		return result.toJson();
 	}
 }

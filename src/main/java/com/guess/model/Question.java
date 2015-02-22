@@ -16,7 +16,7 @@ public class Question extends BaseModel{
 	private String linkUrl;
 	private String options;//question options
 	private String answer;//question answer
-	private String username;
+	private String userId;
 	private String categories;//json format, includes multiple items, every item contains category name and id
 	private boolean isPublic;//true-all users can find the question
 	private boolean isPublished;
@@ -74,11 +74,11 @@ public class Question extends BaseModel{
 		this.categories = categories;
 	}
 	@Column(nullable = false)
-	public String getUsername() {
-		return username;
+	public String getUserId() {
+		return userId;
 	}
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 	@Column(nullable = false)
 	public QuestionType getType() {

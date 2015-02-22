@@ -124,6 +124,7 @@ public class UserController {
 				userInSession.username = username;
 				userInSession.role = UserRole.INDIVIDUAL;
 				userInSession.nickname = nickname;
+				userInSession.avatar = in.getAvatar();
 				
 				request.getSession().setAttribute("user", userInSession);
 				result.set("id", id);
@@ -143,6 +144,7 @@ public class UserController {
 				org.setPassword(DigestUtils.md5Hex(password));
 				org.setRole(userRole);
 				org.setNickname(nickname);
+				org.setAvatar(org.getAvatar());
 				
 				String contextPath = request.getSession().getServletContext().getRealPath("/");
 				
@@ -214,6 +216,7 @@ public class UserController {
 			userInSession.role = userRole;
 			userInSession.username = username;
 			userInSession.nickname = user.getNickname();
+			userInSession.avatar = user.getAvatar();
 			
 			request.getSession().setAttribute("user", userInSession);
 			 result.set("id", user.getId());
