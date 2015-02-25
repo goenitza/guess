@@ -2,12 +2,14 @@ package com.guess.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.guess.dao.CategoryDao;
 import com.guess.model.Category;
 import com.guess.service.CategoryService;
 
 @Component
+@Transactional
 public class CategoryServiceImpl extends BaseServiceImpl<Category, String> implements CategoryService{
 	
 	private CategoryDao categoryDao;

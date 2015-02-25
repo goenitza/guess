@@ -14,6 +14,7 @@ import com.guess.service.OrganizationService;
 import com.guess.service.UserStatisticsService;
 
 @Component
+@Transactional
 public class OrganizationServiceImpl extends BaseServiceImpl<Organization, String> implements OrganizationService{
 	private OrganizationDao organizationDao;
 	@Autowired
@@ -33,7 +34,6 @@ public class OrganizationServiceImpl extends BaseServiceImpl<Organization, Strin
 		return organizationDao.getByUsername(username);
 	}
 	
-	@Transactional
 	public String save(Organization organization, String contextPath) throws IOException{
 		String id = organizationDao.save(organization);
 		

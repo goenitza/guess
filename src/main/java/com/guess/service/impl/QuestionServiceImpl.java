@@ -35,6 +35,7 @@ import com.guess.vo.QuestionOption;
 import com.guess.vo.QuestionOptions;
 
 @Component
+@Transactional
 public class QuestionServiceImpl extends BaseServiceImpl<Question, String>
 		implements QuestionService {
 
@@ -66,7 +67,6 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question, String>
 		this.questionDao = questionDao;
 	}
 
-	@Transactional
 	public String save(String nickname,String avatar, 
 			Question question, MultipartFile contentImage, String options,
 			MultipartFile[] optionsImages, String contextPath, List<String> userIds) throws IOException {
@@ -165,7 +165,6 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question, String>
 		return id;
 	}
 
-	@Transactional
 	public void share(String userId, String nickname,String avatar,
 			String questionId, List<String> userIds) {
 		
@@ -202,7 +201,6 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question, String>
 
 	}
 
-	@Transactional
 	public void publish(String nickname,String avatar, 
 			String questionId, boolean isPublic, List<String> userIds) {
 		Question question = questionDao.get(questionId);

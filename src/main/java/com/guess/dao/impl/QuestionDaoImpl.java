@@ -20,8 +20,7 @@ public class QuestionDaoImpl extends BaseDaoImpl<Question, String> implements Qu
 	@Override
 	public List<Question> getAllList(){
 		String query = "from Question q where q.isDeleted = false";
-		List<Question> questions = hibernateTemplate.find(query);
-		return questions;
+		return currentSession().createQuery(query).list();
 	}
 	
 	@Override

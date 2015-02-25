@@ -25,6 +25,7 @@ import com.guess.vo.IndividualVO;
 import com.guess.vo.OrgVO;
 
 @Component
+@Transactional
 public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> implements CircleUserService{
 	
 	private CircleUserDao circleUserDao;
@@ -54,7 +55,6 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		return circleUserDao.exist(userId, _userId, circleId);
 	}
 	
-	@Transactional
 	public void deleteFollowingAndFollower(String userId, String _userId) {
 		CircleUser circleUser = circleUserDao.get(userId, _userId);
 		if(circleUser != null){
@@ -65,7 +65,6 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		
 	}
 	
-	@Transactional
 	public void payAttention(String userId, String _userId, UserRole role, String nickname) {
 		
 		CircleUser circleUser = new CircleUser();
@@ -89,7 +88,6 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		messageDao.save(message);
 	}
 	
-	@Transactional
 	public List<IndividualVO> getAllFriend(String userId) {
 		List<String> ids = circleUserDao.getAllFriendIds(userId);
 		List<IndividualVO> individualVOs = new ArrayList<IndividualVO>();
@@ -105,7 +103,6 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		return individualVOs;
 	}
 	
-	@Transactional
 	public List<IndividualVO> getAllFollower(String userId) {
 		List<String> ids = circleUserDao.getAllFollowerIds(userId);
 		List<IndividualVO> individualVOs = new ArrayList<IndividualVO>();
@@ -121,7 +118,6 @@ public class CircleUserServiceImpl extends BaseServiceImpl<CircleUser, String> i
 		return individualVOs;
 	}
 	
-	@Transactional
 	public List<OrgVO> getAllFollowing(String userId) {
 		List<String> ids = circleUserDao.getAllFollowingIds(userId);
 		List<OrgVO> orgVOs = new ArrayList<OrgVO>();

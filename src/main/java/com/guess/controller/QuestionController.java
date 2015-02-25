@@ -179,4 +179,13 @@ public class QuestionController {
 		logger.info("share question: " + questionId);
 		return result.toJson();
 	}
+	
+	@RequestMapping("/delete")
+	@ResponseBody
+	public String delete(String [] ids ){
+		Result result = new Result();
+		questionService.delete(ids);
+		logger.info("delete questions");
+		return result.toJson();
+	}
 }

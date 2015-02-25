@@ -11,13 +11,9 @@ import com.guess.model.Category;
 public class CategoryDaoImpl extends BaseDaoImpl<Category, String> implements CategoryDao{
 
 	public Category getByName(String name) {
-		String query = "from Category g where g.name = ?";
-		List<Category> categories = hibernateTemplate.find(query, name);
-		if(categories.size() == 0){
-			return null;
-		}else {
-			return categories.get(0);
-		}
+		String query = "from Category g where g.name = :name";
+		return (Category) currentSession().createQuery(query)
+				.setString("name", name).uniqueResult();
 	}
 	
 	@Override
@@ -32,8 +28,7 @@ public class CategoryDaoImpl extends BaseDaoImpl<Category, String> implements Ca
 	@Override
 	public List<Category> getAllList(){
 		String query = "from Category g where g.isDeleted = false";
-		List<Category> categories = hibernateTemplate.find(query);
-		return categories;
+		return currentSession().createQuery(query).list();
 	}
 	
 	@Override

@@ -11,8 +11,6 @@ public interface BaseService <T, PK extends Serializable>{
 	
 	List<T> getAllList();
 	
-	long getTotalCount();
-	
 	PK save(T entity);
 	
 	void update(T entity);
@@ -22,10 +20,4 @@ public interface BaseService <T, PK extends Serializable>{
 	void delete(PK id);
 	
 	void delete(PK[] ids);
-
-	public void flush();
-
-	public void evict(Object object);
-	
-	public void clear();
 }

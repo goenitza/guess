@@ -11,8 +11,7 @@ import com.guess.model.Message;
 public class MessageDaoImpl extends BaseDaoImpl<Message, String> implements MessageDao{
 
 	public List<Message> getAll(String receiverId) {
-		String query = "from Message m where m.receiverId = ?";
-		List<Message> messages = hibernateTemplate.find(query, receiverId);
-		return messages;
+		String query = "from Message m where m.receiverId = :receiverId";
+		return currentSession().createQuery(query).setString("receiverId", receiverId).list();
 	}
 }

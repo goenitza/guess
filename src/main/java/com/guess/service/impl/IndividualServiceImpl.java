@@ -15,6 +15,7 @@ import com.guess.service.IndividualService;
 import com.guess.service.UserStatisticsService;
 
 @Component
+@Transactional
 public class IndividualServiceImpl extends BaseServiceImpl<Individual, String> implements IndividualService{
 	private IndividualDao individualDao;
 	@Autowired
@@ -35,7 +36,6 @@ public class IndividualServiceImpl extends BaseServiceImpl<Individual, String> i
 		return individualDao.getByUsername(username);
 	}
 	
-	@Transactional
 	public String save(Individual individual, String contextPath) throws IOException{
 		//Individual
 		String id = individualDao.save(individual);

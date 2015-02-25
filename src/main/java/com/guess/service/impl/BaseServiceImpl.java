@@ -36,10 +36,6 @@ public class BaseServiceImpl <T,PK extends Serializable> implements BaseService<
 		return baseDao.getAllList();
 	}
 
-	public long getTotalCount() {
-		return baseDao.getTotalCount();
-	}
-
 	public T load(PK id) {
 		return baseDao.load(id);
 	}
@@ -50,14 +46,5 @@ public class BaseServiceImpl <T,PK extends Serializable> implements BaseService<
 
 	public void update(T entity) {
 		baseDao.update(entity);
-	}
-	public void clear() {
-		baseDao.clear();
-	}
-	public void evict(Object object) {
-		baseDao.evict(object);
-	}
-	public void flush() {
-		baseDao.flush();
 	}
 }

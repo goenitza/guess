@@ -16,6 +16,7 @@ import com.guess.service.CircleUserService;
 import com.guess.service.MessageService;
 
 @Component
+@Transactional
 public class MessageServiceImpl extends BaseServiceImpl<Message, String> implements MessageService{
 	private MessageDao messageDao;
 	@Autowired
@@ -34,7 +35,6 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 		return messageDao.getAll(receiverId);
 	}
 	
-	@Transactional
 	public void processFriendApplication(Message message, boolean isAgreed,
 			String nickname, String avatar) {
 		String receiverId = message.getReceiverId();
@@ -67,7 +67,6 @@ public class MessageServiceImpl extends BaseServiceImpl<Message, String> impleme
 		messageDao.update(message);
 	}
 	
-	@Transactional
 	public void processFriendApplicationReply(Message message, String id,
 			String circleId) {
 		

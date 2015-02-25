@@ -11,8 +11,6 @@ public interface BaseDao <T ,PK extends Serializable>{
 	
 	List<T> getAllList();
 	
-	long getTotalCount();
-	
 	PK save(T entity);
 	
 	void update(T entity);
@@ -22,10 +20,4 @@ public interface BaseDao <T ,PK extends Serializable>{
 	void delete(PK ID);
 	
 	void delete(PK[] IDs);
-	
-	public void flush();
-	
-	public void evict(Object object);
-	
-	public void clear();
 }

@@ -20,41 +20,38 @@ public class CircleUserDaoImpl extends BaseDaoImpl<CircleUser, String> implement
 	}
 	
 	public CircleUser get(String userId, String _userId){
-		String query = "from CircleUser cu where cu.userId = ? and cu._userId = ?";
-		List<CircleUser> circleUsers = hibernateTemplate.find(query, userId, _userId);
-		return circleUsers.size() == 0 ? null : circleUsers.get(0);
+		String query = "from CircleUser cu where cu.userId = :userId and cu._userId = :_userId";
+		return (CircleUser) currentSession().createQuery(query).setString("userId", userId)
+			.setString("_userId", _userId).setMaxResults(1).uniqueResult();
 	}
 	
 	public CircleUser get(String userId, String _userId, String circleId){
-		String query = "from CircleUser cu where cu.userId = ? and cu._userId = ? and cu.circleId = ?";
-		List<CircleUser> circleUsers = hibernateTemplate.find(query, userId, _userId, circleId);
-		return circleUsers.size() == 0 ? null : circleUsers.get(0);
+		String query = "from CircleUser cu where cu.userId = :userId and cu._userId = :_userId and cu.circleId = :circleId";
+		return (CircleUser) currentSession().createQuery(query).setString("userId", userId)
+				.setString("_userId", _userId).setString("circleId", circleId).uniqueResult();
 	}
 
 	public List<String> getAllFriendIds(String userId) {
-		String query = "select distinct cu._userId from CircleUser cu where cu.userId = ? and cu.type = '" + CircleUserType.FRIEND + "'";
-		List<String> ids = hibernateTemplate.find(query, userId);
-		return ids;
+		String query = "select distinct cu._userId from CircleUser cu where cu.userId = :userId and cu.type = '" + CircleUserType.FRIEND + "'";
+		return currentSession().createQuery(query).setString("userId", userId)
+				.list();
 	}
 
 	public List<String> getAllFollowerIds(String userId) {
-		String query = "select distinct cu._userId from CircleUser cu where cu.userId = ? and cu.type = '" + CircleUserType.FOLLOWER + "'";
-		List<String> ids = hibernateTemplate.find(query, userId);
-		return ids;
+		String query = "select distinct cu._userId from CircleUser cu where cu.userId = :userId and cu.type = '" + CircleUserType.FOLLOWER + "'";
+		return currentSession().createQuery(query).setString("userId", userId).list();
 	}
 
 	public List<String> getAllFollowingIds(String userId) {
-		String query = "select distinct cu._userId from CircleUser cu where cu.userId = ? and cu.type = '" + CircleUserType.FOLLOWING + "'";
-		List<String> ids = hibernateTemplate.find(query, userId);
-		return ids;
+		String query = "select distinct cu._userId from CircleUser cu where cu.userId = :userId and cu.type = '" + CircleUserType.FOLLOWING + "'";
+		return currentSession().createQuery(query).setString("userId", userId).list();
 	}
 
 	public List<String> getFriendOrFollowerByCircle(String userId,
 			String circleId) {
-		String query = "select distinct cu._userId from CircleUser cu where cu.userId = ? and cu.circleId = ? and ( cu.type = '" 
+		String query = "select distinct cu._userId from CircleUser cu where cu.userId = :userId and cu.circleId = :circleId and ( cu.type = '" 
 			+ CircleUserType.FRIEND + "' or cu.type = '" + CircleUserType.FOLLOWER + "')";
-		List<String> ids = hibernateTemplate.find(query, userId, circleId);
-		return ids;
+		return currentSession().createQuery(query).setString("userId", userId)
+				.setString("circleId", circleId).list();
 	}
-
 }
